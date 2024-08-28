@@ -1,0 +1,308 @@
+#!/bin/bash
+
+get_internal_address(){
+   internal_address="$(ifconfig eth0 | grep inet | grep -v inet6 | awk -F' ' {'print $2'})"
+   echo $internal_address
+}
+
+get_public_address(){
+   public_address="$(ifconfig eth0 | grep "inet" |grep -v inet6 | awk -F' ' '{print $2}')"
+   echo $public_address
+}
+
+get_hostname(){
+   # hostname=`hostname | awk -F'.' {'print $1'}`
+    echo $(hostname)
+}
+
+get_master_name(){
+  # master_node=`cat 0_serverconfig | grep master | awk -F' ' {'print $2'}`
+  # echo ${master_node}
+   echo $(hostname)
+}
+
+get_cluster(){
+  # del=$1
+  # list_node=`cat 0_serverconfig | awk -F' ' {'print $2'} | tr '\n' "${del}"`
+  # echo ${list_node::-1}
+  echo $(hostname)
+}
+
+echo $(get_internal_address) $(hostname) >> /etc/hosts
+
+echo "Configuring paas manager..."
+docker run -d -p 8888:8888 --restart=always --name aia-sdk-paas-manager -v /data:/data armdocker.rnd.ericsson.se/aia/aia-sdk-paas-manager --host=$(get_internal_address) --paas.url=http://$(get_internal_address):8888 --paas.marathon.url=http://$(get_internal_address):8080
+
+echo "Configuring mapR..."
+dev_list=$(find /dev/ -type b -name "vd[c-z]" | tr '\n' ',')
+
+mapr_disk=""
+
+if [[ "$dev_list" == "" ]];then
+dd if=/dev/zero of=/root/storagefile bs=1G count=20
+mapr_disk="/root/storagefile"
+else
+    mapr_disk="${dev_list::-1}"
+fi
+
+echo "Getting the host interface address..."
+ip_address=$(get_public_address)
+local_hostname=$(get_hostname)
+mastername=$(get_master_name)
+cluster_node=$(get_master_name)
+
+echo "Enabling rack file..."
+sed -i -e 's/^#net.topology.table.file.name.*$/net.topology.table.file.name=\/opt\/mapr\/conf\/rack.txt/g' /opt/mapr/conf/cldb.conf
+
+echo "Creating rack file..."
+echo "$(get_hostname) /aia-rack1" > /opt/mapr/conf/rack.txt
+
+systemctl status mapr-cldb
+systemctl status mapr-warden
+
+systemctl stop mapr-warden
+systemctl stop mapr-cldb
+
+echo "Configuring mapR cluster..."
+/opt/mapr/server/configure.sh -C ${cluster_node} -Z ${mastername} -HS ${mastername} -N aia.analytics -D ${mapr_disk} -noDB -u cloud-user -g cloud-user -on-prompt-cont y
+
+chown cloud-user:cloud-user /root/storagefile
+chmod 777 /root/storagefile
+
+mkdir /mapr
+echo localhost:/mapr /mapr hard,nolock >> /opt/mapr/conf/mapr_fstab
+
+systemctl start mapr-cldb
+systemctl start mapr-warden
+
+echo "Configuring account for mapR..."
+/opt/mapr/bin/maprcli acl edit -type cluster -user cloud-user:fc
+
+echo "Creating hdfs folder for spark..."
+hadoop fs -mkdir -p /apps/spark
+hadoop fs -chmod 777 /apps/spark
+hadoop fs -chown -R cloud-user:cloud-user /apps/spark
+
+cat > /tmp/mapr.lic <<EOF
+-----BEGIN SIGNED MESSAGE-----
+version: "4.0"
+customerid: "Ericsson"
+issuer: "MapR Technologies"
+licType: Bolt
+description: "MapR M7 Edition"
+enforcement: HARD
+gracePeriod: 0
+issuedate: 1410234291
+expirationdate: 4102272000
+issuedateStr: "Tue Sep 09 03:44:51 UTC 2014"
+expdateStr: "Wed Dec 30 00:00:00 UTC 2099"
+partnerName: "Ericsson"
+Email: "aadenwala@maprtech.com"
+capabilities {
+  feature: NFS
+  name: "NFS"
+  permission: ALLOW
+  featureData {
+    maxNfsNodes: "unlimited"
+  }
+}
+capabilities {
+  feature: NFS_MULTINODE
+  name: "NFS Multiple Nodes"
+  permission: ALLOW
+}
+capabilities {
+  feature: NFS_HA
+  name: "NFS HA"
+  permission: ALLOW
+}
+capabilities {
+  feature: MULTI_CLUSTER
+  name: "Multiple Clusters Support"
+  permission: ALLOW
+}
+capabilities {
+  feature: CLDB_HA
+  name: "CLDB HA"
+  permission: ALLOW
+}
+capabilities {
+  feature: JOBTRACKER_HA
+  name: "JobTracker HA"
+  permission: ALLOW
+}
+capabilities {
+  feature: SNAPSHOT
+  name: "Snapshots"
+  permission: ALLOW
+}
+capabilities {
+  feature: MIRRORING
+  name: "Mirroring"
+  permission: ALLOW
+}
+capabilities {
+  feature: DATA_PLACEMENT
+  name: "Data Placement"
+  permission: ALLOW
+}
+capabilities {
+  feature: MAXNODES
+  name: "Max Nodes in Cluster"
+  permission: ALLOW
+  featureData {
+    maxNodes: "unlimited"
+  }
+}
+capabilities {
+  feature: OPTIMIZED_SHUFFLE
+  name: "Optimized Shuffle"
+  permission: ALLOW
+}
+capabilities {
+  feature: JM_CHARTS
+  name: "Job Management Charts"
+  permission: ALLOW
+}
+capabilities {
+  feature: JM_HISTOGRAMS
+  name: "Job Management Histograms"
+  permission: ALLOW
+}
+capabilities {
+  feature: MAPR_TABLES_FULL
+  name: "MapR Tables Full"
+  permission: ALLOW
+}
+capabilities {
+  feature: MAPR_TABLES
+  name: "MapR Tables"
+  permission: ALLOW
+}
+UniversalKey: true
+-----BEGIN DATA-----
+EgM0LjAaCEVyaWNzc29uKhFNYXBSIFRlY2hub2xvZ2llczAJOg9NYXBSIE03IEVkaXRpb25AAkgA
+ULPvuaAFWIDojqQPYhxUdWUgU2VwIDA5IDAzOjQ0OjUxIFVUQyAyMDE0ahxXZWQgRGVjIDMwIDAw
+OjAwOjAwIFVUQyAyMDk5kgEIRXJpY3Nzb26aARZhYWRlbndhbGFAbWFwcnRlY2guY29togEWCAES
+A05GUxgDUgsKCXVubGltaXRlZKIBGAgCEhJORlMgTXVsdGlwbGUgTm9kZXMYA6IBDAgDEgZORlMg
+SEEYA6IBHwgEEhlNdWx0aXBsZSBDbHVzdGVycyBTdXBwb3J0GAOiAQ0IBRIHQ0xEQiBIQRgDogET
+CAYSDUpvYlRyYWNrZXIgSEEYA6IBDwgHEglTbmFwc2hvdHMYA6IBDwgIEglNaXJyb3JpbmcYA6IB
+FAgJEg5EYXRhIFBsYWNlbWVudBgDogEnCAoSFE1heCBOb2RlcyBpbiBDbHVzdGVyGANSCxIJdW5s
+aW1pdGVkogEXCAsSEU9wdGltaXplZCBTaHVmZmxlGAOiARsIDBIVSm9iIE1hbmFnZW1lbnQgQ2hh
+cnRzGAOiAR8IDRIZSm9iIE1hbmFnZW1lbnQgSGlzdG9ncmFtcxgDogEWCA8SEE1hcFIgVGFibGVz
+IEZ1bGwYA6IBEQgOEgtNYXBSIFRhYmxlcxgDqAEB
+-----BEGIN SIGNATURE-----
+ozYWgZmMVA6tZuJNYyysWl5ECKFKYZv7bnQuYQknsw1LM7LID0oKEBBzHyclISiofytYhclak0G7
+Gkz+VWr2DyupjwixP3kJFEjKiTkilwS84/RvPcYApQEgQpwFfKncdlho2ESIPlBc0h0u5qHkLh3T
+yufd9WpdglarcrkD5+6nUodsQg2tEBIRZ1b7QtiQ+NoWjCAEIUgliEQ8TKaY6VTERi0ic3iJ+kxh
+Eb0no5gkt2IDGbSju4UCYxfYBlStxjMhGYWt2EvZFWVc89mpsEi1Qp1F7l45iEptLqodgvpaau8l
+RWvKEhUvQHupHG+srfH/Goc/ZTx/Pte+dEdbJymj8QN31T5Na2uK9PUEKMH3KmMhOufvr1H/HGkx
+HqE3JvKcnthEMmvynnPywnjWTgqeQu+3TxNUnka78vDG3jWfQ/lIL6I0w+TnA8MG3T18rAzzM7Tw
+6syR5UwtHQuwLWi78S7+zgEHLtAywwzHUwYK7hj8AGvZnoQzFl9X/bz3ZZK0Q3ONap7xgQAhas+f
+x2rhbODgX8BvEbn256NWJUqI0nojhrkdaZBa2OnCwUrnrHGXEDIhh9CI6ExB2LRJ7MA6sBVXP6XF
+0zt4SVIjWJ6q0RFQm5/3kxm94nct9wpm1bKK6dSlgYo7LGH3rMX/kwSQcuAGQqmCFC+qWkK2Vi73
+ibep8AHXuOtCO8f2vXqOiOOHmLQa/D0KqxUsHgNAgtVxzz+YciZQVnr79V2d7BaPjzWyrAmibtFK
+WhfW+8cHdSQfxMmlQpZ2ufGu4iu8Vcf3PbQWBqDMFLADjHN77mErH4iNe4NCeNavFahLK1CytDbr
+CLZpMe1eSpGYXskiDFkp7zDrlYdy3BjoNpONm6ZbpxJGqLI+fgzZNANgkjr+jLvg91BjEOZ3giI+
+ij/0tzfmUF2wCYxPAgZlLuBobcb9eA9/Z9SrfWVFUHGhAPgaBl+ZJopu8X8H2eeYstDu0npOifEM
+wRBltAkZtliSq3JeRq0JgYtcjnqZX40mjPBwUl3z7MxvWjmq//Q/PoWCwh1oqR+2K1NOpymzFplT
+dbQtQoDRPA8+qx1DzguhnI9S9A3nOFhkKIBQYz3EnIL6h+dgzw/mATCxJ72rv50rNVYtKPpMeI9/
+RlTLNOsI4BDQz6kCn1km2yJ5ss+Z+wMKOJCZCo2bOuD6z6zbgnPUUjt3ZGKw81CX8h5d2/g12tOU
+9jooC6NoZJfVNMPWqS/Q2gZW5jWx0qa0qZF5O1P+r/J00EKQuWgycVYLsKouOZqQOxPAqm4ZfOfF
+lS0DJbdWDLIumwDoWR9zBOd9DNQT8n+yxX/aO3NmJei++gMLo93uhWWqOXpdnZ3oaA8zG/weuA==
+-----END SIGNATURE-----
+4B26/BlFvdpBES9wNoF2Odt3Q/0=
+-----END MESSAGE HASH-----
+EOF
+
+echo "Installing mapR license..."
+/usr/bin/maprcli license add -is_file true -license /tmp/mapr.lic
+
+rm -rf /tmp/mapr.lic
+
+echo "Configuring hive..."
+master_name=$(get_master_name)
+
+cat > /opt/mapr/hive/hive-1.2/conf/hive-site.xml <<EOF
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<configuration>
+<property>
+  <name>javax.jdo.option.ConnectionURL</name>
+  <value>jdbc:postgresql://${master_name}/metastore</value>
+</property>
+<property>
+  <name>javax.jdo.option.ConnectionDriverName</name>
+  <value>org.postgresql.Driver</value>
+</property>
+<property>
+  <name>javax.jdo.option.ConnectionUserName</name>
+  <value>hiveuser</value>
+</property>
+<property>
+  <name>javax.jdo.option.ConnectionPassword</name>
+  <value>hiveuser</value>
+</property>
+   <property>
+      <name>datanucleus.schema.autoCreateAll</name>
+      <value>true</value>
+      <description>creates necessary schema on a startup if one doesn't exist. set
+         this to false, after creating it once</description>
+   </property>
+<property>
+  <name>hive.metastore.uris</name>
+  <value>thrift://${master_name}:9083</value>
+  <description>IP address (or fully-qualified domain name) and port of the metastore host</description>
+</property>
+<property>
+  <name>hive.zookeeper.quorum</name>
+  <description>Zookeeper quorum used by Hive's Table Lock Manager</description>
+  <value>localhost:5181</value>
+</property>
+</configuration>
+EOF
+
+echo "Configuring SPARK..."
+echo "Coyping hive-site.xml to spark..."
+cp /opt/mapr/hive/hive-1.2/conf/hive-site.xml /opt/mapr/spark/spark-1.6.1/conf
+echo "Updateing hive version for spark..."
+sed -ie "s/^hive.*/hive_version=1.2/g" /opt/mapr/spark/spark-1.6.1/mapr-util/compatibility.version
+
+echo "Configuring SPARK..."
+echo "Coyping hive-site.xml to spark..."
+cp /opt/mapr/hive/hive-1.2/conf/hive-site.xml /opt/mapr/spark/spark-1.6.1/conf
+echo "Updateing hive version for spark..."
+sed -ie "s/^hive.*/hive_version=1.2/g" /opt/mapr/spark/spark-1.6.1/mapr-util/compatibility.version
+
+echo "Configuring alluxio..."
+cd /opt/mapr/alluxio
+cd conf/
+cp alluxio-env.sh.template alluxio-env.sh
+cat >> alluxio-env.sh <<EOF
+ALLUXIO_MASTER_HOSTNAME=${ALLUXIO_MASTER_HOSTNAME:-"${master_name}"}
+ALLUXIO_WORKER_MEMORY_SIZE=${ALLUXIO_WORKER_MEMORY_SIZE:-"2048MB"}
+ALLUXIO_RAM_FOLDER=${ALLUXIO_RAM_FOLDER:-"/aia/ramdisk"}
+ALLUXIO_UNDERFS_ADDRESS=${ALLUXIO_UNDERFS_ADDRESS:-"/mapr/aia.analytics/tmp/underFSStorage"}
+ALLUXIO_JAVA_OPTS+="-Dalluxio.master.journal.folder=/mapr/aia.analytics/tmp/journal"
+EOF
+cd -
+
+bin/alluxio format
+bin/alluxio-start.sh all
+
+echo "Configurating mesos/marathon..."
+echo "$(get_public_address)" > /etc/mesos-master/ip
+echo "$(get_public_address)" > /etc/mesos-slave/ip
+
+echo "Starting Mesos master and slave"
+systemctl enable mesos-master.service
+systemctl enable mesos-slave.service
+
+systemctl start mesos-master.service
+systemctl start mesos-slave.service
+
+echo "Starting Marathon"
+systemctl enable marathon.service
+systemctl start marathon.service
+
+

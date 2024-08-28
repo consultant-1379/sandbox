@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FlowDefinition xmlns="urn:com:ericsson:schema:xml:oss:fbp_flow" xmlns:oc="urn:com:ericsson:schema:xml:oss:oss_common" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" oc:ns="com.ericsson.oss.services"
+	oc:name="CSLSolutionSet" oc:version="1.0.0">
+	<oc:modelCreationInfo author="eachsaj" creationDate="today">
+		<oc:designedModel componentId="someComponentId" />
+	</oc:modelCreationInfo>
+	<oc:desc>ExtEps Test for an extension Simple Stream</oc:desc>
+	<input name="radio-stream">
+        <attribute name="uri" value="kafka://radio_up"/>
+        <attribute name ="metadata.broker.list" value="localhost:9092"/>
+        <attribute name="win.length" value="300000"/>
+        <attribute name="slide.win.length" value="300000"/>	
+        <attribute name="group.id" value="radio_sesssion"/>	
+    </input>
+    <output name="alluxio-store">
+        <attribute name="uri" value="alluxio://RADIO_USER_SESSION"/>
+        <attribute name="master-url" value="localhost:19998"/>        
+    </output>
+	<step name="ups-spark-streaming">
+	    <attribute name="uri" value="spark-streaming://SparkStreamingExampleApp"/>
+	    <attribute name="master.url" value="local[*]"/>
+	    <attribute name="spark.externalBlockStore.url" value="alluxio://localhost:19998"/>
+	    <attribute name="spark.externalBlockStore.baseDir" value="alluxio://localhost:19998/staging/ups/"/>
+	    <attribute name="streaming.checkpoint" value="alluxio://localhost:19998/ups-checkpoint/kafka"/>
+		<attribute name="driver-class" value="com.ericsson.aia.bps.streaming.correlations.SparkStreamingExampleApp" />
+	</step> 
+	<path>
+		<from uri="radio-stream" />
+		<to uri="ups-spark-streaming" />
+		<to uri="alluxio-store" />
+	</path>	
+</FlowDefinition>

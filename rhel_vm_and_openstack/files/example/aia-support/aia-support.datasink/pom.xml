@@ -1,0 +1,30 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>aia-support.datasink</artifactId>
+	<name>${project.artifactId}</name>
+	<url></url>
+	<description>A data sink that listens on a Kafka topic for events in Avro format</description>
+	<inceptionYear>2016</inceptionYear>
+
+	<parent>
+		<groupId>com.ericsson.nmlab.aia-support</groupId>
+		<artifactId>aia-support</artifactId>
+		<version>0.1.0-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.ericsson.component.aia.common.avro</groupId>
+			<artifactId>kafka-avro-decoder</artifactId>
+			<version>2.0.6</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.kafka</groupId>
+			<artifactId>kafka-clients</artifactId>
+			<version>0.9.0.0</version>
+		</dependency>
+	</dependencies>
+</project>

@@ -1,0 +1,16 @@
+[Unit]
+Description=Confluent Schema Registry
+After=kafka-server.service
+Wants=kafka-server.service
+
+[Service]
+Type=simple
+User=root
+ExecStartPre=/bin/sh -c 'sleep 20'
+ExecStart=/bin/schema-registry-start /etc/schema-registry/schema-registry.properties
+ExecStop=/bin/schema-registry-stop
+Restart=on-abort
+
+
+[Install]
+WantedBy=multi-user.target

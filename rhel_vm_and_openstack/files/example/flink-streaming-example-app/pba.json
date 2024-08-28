@@ -1,0 +1,50 @@
+{
+  "pba": {
+    "name": "flink-streaming-example-app",
+    "version": "1.0.1",
+    "description": "This is application is used to demo the BPS based flink streaming.",
+    "integrationPoints":[
+    {
+        "applicationName": "flink streaming example app",
+        "applicationVersion": "1.0.1",
+        "schema": "hive",
+        "attributes": {
+            "data.format": "parquet",
+            "uri": "hive://flink-streaming-example"
+        }
+    }
+],
+"deployments": {
+      "zookeeper": {
+        "id": "/aia-flink-streaming-example-app",
+        "uris": [
+          "file:///root/docker.tar.gz"
+        ],
+        "instances": 1,
+        "cpus": 1,
+        "mem": 512,
+        "container": {
+          "type": "DOCKER",
+          "docker":{
+            "network": "BRIDGE",
+            "image": "localhost:5000/aia/aia-flink-streaming-example-app:1.0.1",
+            "forcePullImage": true,
+            "privileged": true,
+            "parameters":[
+              {"key" :"env","value" : "mainClass=com.ericsson.component.aia.services.bps.engine.service.BPSPipeLineExecuter"},
+              {"key" :"env","value" : "masterUrl=172.17.0.1:6123"},
+              {"key" :"env","value" : "flowPath=/home/cloud-user/example/flink-streaming-example-app/flow.xml"},
+              {"key" :"env","value" : "jobArguments="}
+            ]
+          },"volumes": [
+            {
+              "containerPath": "/home",
+              "hostPath": "/home",
+              "mode": "RW"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

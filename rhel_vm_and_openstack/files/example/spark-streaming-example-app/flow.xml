@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FlowDefinition
+    xmlns="urn:com:ericsson:schema:xml:oss:fbp_flow"
+    xmlns:oc="urn:com:ericsson:schema:xml:oss:oss_common"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" oc:ns="com.ericsson.oss.services" oc:name="CSLSolutionSet" oc:version="1.0.0">
+    <oc:modelCreationInfo author="eachsaj" creationDate="25/5/2016">
+        <oc:designedModel componentId="BatchProcessingSpark" />
+    </oc:modelCreationInfo>
+    <oc:desc>ExtEps Test for an extension Simple Batch Processing</oc:desc>
+    <input name="radio-stream">
+        <attribute name="uri" value="kafka://spark-streaming-topic"/>
+        <attribute name ="metadata.broker.list" value="172.17.0.1:9092"/>
+        <attribute name="window.length" value="2"/>
+        <attribute name="slide.window.length" value="1"/>
+        <attribute name="group.id" value="1"/>
+        <attribute name="kafka.keyClass" value="java.lang.String"/>
+        <attribute name="kafka.valueClass" value="java.lang.String"/>
+        <attribute name="kafka.keyDecoder.class" value="kafka.serializer.StringDecoder"/>
+        <attribute name="kafka.valueDecoder.class" value="kafka.serializer.StringDecoder"/>	
+        <attribute name="event.type" value="com.ericsson.aia.example.model.access_log"/>
+        <attribute name="schema.registry" value="http://172.17.0.1:8081"/>
+    </input>
+    <step name="ups-spark-streaming">
+        <attribute name="uri" value="spark-streaming://SparkStreamingExampleApp"/>
+        <attribute name="master.url" value="spark://172.17.0.1:7077"/>
+        <attribute name="spark.externalBlockStore.url" value="alluxio://172.17.0.1:19998"/>
+        <attribute name="spark.externalBlockStore.baseDir" value="alluxio://172.17.0.1:19998/staging/ups/"/>
+        <attribute name="streaming.checkpoint" value="alluxio://172.17.0.1:19998/ups-checkpoint/kafka"/>
+        <attribute name="driver-class" value="com.ericsson.aia.bps.streaming.correlations.SparkStreamingExampleApp" />
+    </step>
+    <output name="hive-output">
+        <attribute name="uri" value="hive://spark_streaming_output"/>
+        <attribute name="data.format" value="parquet"/>
+        <attribute name="data.save.mode" value="Append"/>
+    </output>
+<output name="kafka-output">
+    <attribute name="uri" value="kafka://spark-streaming-output-topic?format=avro"/>
+    <attribute name="bootstrap.servers" value="172.17.0.1:9092"/>
+    <attribute name="eventType" value="com.ericsson.aia.example.model.access_log"/>
+  </output>
+    <path>
+        <from uri="radio-stream" />
+        <to uri="spark-streaming" />
+        <to uri="hive-output" />
+        <to uri="kafka-output"/>
+    </path>
+</FlowDefinition>

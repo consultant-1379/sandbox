@@ -1,0 +1,18 @@
+[Unit]
+Description=Jupyter notebook based on anaconda2
+Requires=network-environment.service
+After=network-environment.service
+
+[Service]
+Type=simple
+PIDFile=/run/jupyter2.pid
+EnvironmentFile=/etc/network-environment
+ExecStart=/opt/anaconda2/bin/jupyter notebook --port=28888 --ip=${DEFAULT_IPV4} --NotebookApp.token=
+User=cloud-user
+Group=cloud-user
+WorkingDirectory=/home/cloud-user/notebooks
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

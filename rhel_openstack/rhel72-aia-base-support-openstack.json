@@ -1,0 +1,47 @@
+{
+  "builders": [
+    {
+      "flavor": "m1.medium",
+      "image_name": "aia-base-support",
+      "source_image": "355be5dc-ca4e-4d07-b507-ee8f270c3112",
+      "ssh_username": "cloud-user",
+      "type": "openstack",
+      "region":"RegionOne",
+      "networks": ["30ab699c-e807-44df-81b7-b6631117e58c"],
+      "use_floating_ip":true,
+      "floating_ip_pool":"aia_ext",
+      "identity_endpoint":"http://131.160.163.101:5000/v2.0",
+      "security_groups":["aia-security"],
+      "communicator":"ssh",
+      "ssh_pty":"true",
+      "ssh_bastion_host":"131.160.163.125",
+      "ssh_bastion_username":"gateway",
+      "ssh_bastion_password":"gateway"
+    }
+  ],
+  "provisioners": [{
+        "type": "file",
+        "source": "scripts/0_serverconfig",
+        "destination": "/tmp/0_serverconfig"
+    }, 
+    {
+        "type": "file",
+        "source": "scripts/helper_function.sh",
+        "destination": "/tmp/helper_function.sh"
+    }, 
+	{
+        "type": "shell",
+        "scripts": [
+            "scripts/1_system_base.sh",
+	    "scripts/2_docker.sh",
+            "scripts/3_system_base.sh",
+            "scripts/4_system_dev.sh",
+            "scripts/5_docker_setup.sh",
+	    "scripts/6_mapr_base.sh"
+        ],
+        "environment_vars":[
+             "PROXY_REQUIRED=false"
+        ],
+        "execute_command": "echo 'cloud-user'|sudo -S sh '{{.Path}}'"
+    }]
+}

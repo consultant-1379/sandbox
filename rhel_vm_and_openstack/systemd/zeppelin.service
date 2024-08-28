@@ -1,0 +1,14 @@
+[Unit]
+Description=Apache Zeppelin
+After=spark-worker.service
+
+[Service]
+Type=forking
+User=root
+ExecStart=/opt/zeppelin/bin/zeppelin-daemon.sh start
+ExecStop=/opt/zeppelin/bin/zeppelin-daemon.sh stop
+Restart=on-abort
+
+
+[Install]
+WantedBy=multi-user.target

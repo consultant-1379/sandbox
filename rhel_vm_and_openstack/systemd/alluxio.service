@@ -1,0 +1,14 @@
+[Unit]
+Description=Alluxio
+After=spark-worker.service
+
+[Service]
+Type=forking
+User=root
+ExecStart=/opt/alluxio/bin/alluxio-start.sh local
+ExecStop=/opt/alluxio/bin/alluxio-stop.sh all
+Restart=on-abort
+
+
+[Install]
+WantedBy=multi-user.target

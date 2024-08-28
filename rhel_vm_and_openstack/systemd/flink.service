@@ -1,0 +1,14 @@
+[Unit]
+Description=Apache flink
+After=spark-worker.service
+
+[Service]
+Type=forking
+User=root
+ExecStart=/opt/flink/bin/start-local.sh
+ExecStop=/opt/flink/bin/stop-local.sh
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target
+

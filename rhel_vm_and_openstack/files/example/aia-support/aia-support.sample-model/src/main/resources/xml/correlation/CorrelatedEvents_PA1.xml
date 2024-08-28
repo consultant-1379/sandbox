@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+<eventspecification xmlns="http://www.ericsson.com/PmEvents">
+	<general>
+		<docno>LMI-16:0000</docno>
+		<revision>PA1</revision>
+		<date>2016-10-14</date>
+		<author>Liam Fallon</author>
+		<ffv>1</ffv>
+		<fiv>1</fiv>
+		<revisionhistory>
+			<revisionhistoryelem>
+				<revision>PA1</revision>
+				<comment>2016-10-14, LMI/LXR/SAA/B Liam Fallon</comment>
+			</revisionhistoryelem>
+		</revisionhistory>
+	</general>
+	<parametertypes>
+		<parametertype>
+			<name>BOOLEAN</name>
+			<type>BOOLEAN</type>
+			<description>A boolean value</description>
+			<numberofbytes>1</numberofbytes>
+			<range>
+				<low>0</low>
+				<high>1</high>
+			</range>
+		</parametertype>
+		<parametertype>
+			<name>GENERIC_FLOAT</name>
+			<type>FLOAT</type>
+			<description>Generic float</description>
+			<numberofbytes>4</numberofbytes>
+		</parametertype>
+		<parametertype>
+			<name>GENERIC_LONG</name>
+			<type>LONG</type>
+			<description>Generic long</description>
+			<numberofbytes>4</numberofbytes>
+		</parametertype>
+		<parametertype>
+			<name>GENERIC_DOUBLE</name>
+			<type>DOUBLE</type>
+			<description>Generic float</description>
+			<numberofbytes>12</numberofbytes>
+		</parametertype>
+		<parametertype>
+			<name>STRING_TYPE</name>
+			<type>STRING</type>
+			<description>The name of an event used in a correlation</description>
+			<numberofbytes>256</numberofbytes>
+		</parametertype>
+		<parametertype>
+			<name>TIMESTAMP</name>
+			<type>LONG</type>
+			<description>A time stamp</description>
+			<numberofbytes>4</numberofbytes>
+			<range>
+				<low>0</low>
+				<high>2147483647</high>
+			</range>
+		</parametertype>
+	</parametertypes>
+
+	<structuretypes>
+		<structuretype>
+			<name>SALES_TRANSACTION</name>
+			<elements>
+				<param type="GENERIC_LONG">SALE_ID</param>
+				<param type="GENERIC_FLOAT">AMOUNT</param>
+				<param type="GENERIC_LONG">ITEM_ID</param>
+				<param type="GENERIC_LONG">QUANTITY</param>
+				<param type="GENERIC_LONG">ASSISTANT_ID</param>
+				<param type="STRING_TYPE">BRANCH_NAME</param>
+				<param type="STRING_TYPE">NOTES</param>
+			</elements>
+		</structuretype>
+		<structuretype>
+			<name>ITEM_DETAILS</name>
+			<elements>
+				<param type="GENERIC_LONG">ITEM_ID</param>
+				<param type="STRING_TYPE">DESCRIPTION</param>
+				<param type="GENERIC_FLOAT">COST_PRICE</param>
+				<param type="GENERIC_LONG">BARCODE</param>
+				<param type="GENERIC_LONG">SUPPLIER_ID</param>
+				<param type="STRING_TYPE">CATEGORY</param>
+			</elements>
+		</structuretype>
+		<structuretype>
+			<name>ASSISTANT_DETAILS</name>
+			<elements>
+				<param type="GENERIC_LONG">ASSISTANT_ID</param>
+				<param type="STRING_TYPE">SURNAME</param>
+				<param type="STRING_TYPE">FIRSTNAME</param>
+				<param type="STRING_TYPE">MIDDLENAME</param>
+				<param type="GENERIC_LONG">AGE</param>
+				<param type="GENERIC_LONG">GRADE</param>
+				<param type="GENERIC_LONG">PHONE_NO</param>
+			</elements>
+		</structuretype>
+		<structuretype>
+			<name>BRANCH_DETAILS</name>
+			<elements>
+				<param type="STRING_TYPE">BRANCH_NAME</param>
+				<param type="GENERIC_LONG">BRANCH_ID</param>
+				<param type="STRING_TYPE">BRANCH_CATEGORY</param>
+				<param type="STRING_TYPE">STREET</param>
+				<param type="STRING_TYPE">CITY</param>
+				<param type="STRING_TYPE">COUNTRY</param>
+				<param type="STRING_TYPE">POSTCODE</param>
+			</elements>
+		</structuretype>
+	</structuretypes>
+
+	<events>
+		<event>
+			<name>SALES_INPUT</name>
+			<id>62300</id>
+			<comment>A Sale.</comment>
+			<elements>
+				<param type="STRING_TYPE">SALE_ID</param>
+				<param type="STRING_TYPE">AMOUNT</param>
+				<param type="STRING_TYPE">ITEM_ID</param>
+				<param type="STRING_TYPE">QUANTITY</param>
+				<param type="STRING_TYPE">ASSISTANT_ID</param>
+				<param type="STRING_TYPE">BRANCH_NAME</param>
+				<param type="STRING_TYPE">NOTES</param>
+			</elements>
+		</event>
+
+		<event>
+			<name>ITEM_INPUT</name>
+			<id>62310</id>
+			<comment>Information on Items.</comment>
+			<elements>
+				<param type="STRING_TYPE">ITEM_ID</param>
+				<param type="STRING_TYPE">DESCRIPTION</param>
+				<param type="STRING_TYPE">COST_PRICE</param>
+				<param type="STRING_TYPE">BARCODE</param>
+				<param type="STRING_TYPE">SUPPLIER_ID</param>
+				<param type="STRING_TYPE">CATEGORY</param>
+			</elements>
+		</event>
+
+		<event>
+			<name>ASSISTANT_INPUT</name>
+			<id>62320</id>
+			<comment>Information on Assistants.</comment>
+			<elements>
+				<param type="STRING_TYPE">ASSISTANT_ID</param>
+				<param type="STRING_TYPE">SURNAME</param>
+				<param type="STRING_TYPE">FIRSTNAME</param>
+				<param type="STRING_TYPE">MIDDLENAME</param>
+				<param type="STRING_TYPE">AGE</param>
+				<param type="STRING_TYPE">GRADE</param>
+				<param type="STRING_TYPE">PHONE_NO</param>
+			</elements>
+		</event>
+
+		<event>
+			<name>BRANCH_INPUT</name>
+			<id>62330</id>
+			<comment>Information on Branches.</comment>
+			<elements>
+				<param type="STRING_TYPE">BRANCH_NAME</param>
+				<param type="STRING_TYPE">BRANCH_ID</param>
+				<param type="STRING_TYPE">BRANCH_CATEGORY</param>
+				<param type="STRING_TYPE">STREET</param>
+				<param type="STRING_TYPE">CITY</param>
+				<param type="STRING_TYPE">COUNTRY</param>
+				<param type="STRING_TYPE">POSTCODE</param>
+			</elements>
+		</event>
+
+		<event>
+			<name>SALES_EVENT</name>
+			<id>62340</id>
+			<comment>This event is an aggregation of input for the sale event</comment>
+			<elements>
+				<struct type="SALES_TRANSACTION">SALES_TRANSACTION</struct>
+				<struct type="ITEM_DETAILS">ITEM_DETAILS</struct>
+				<struct type="ASSISTANT_DETAILS">ASSISTANT_DETAILS</struct>
+				<struct type="BRANCH_DETAILS">BRANCH_DETAILS</struct>
+			</elements>
+		</event>
+	</events>
+</eventspecification>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FlowDefinition xmlns="urn:com:ericsson:schema:xml:oss:fbp_flow" xmlns:oc="urn:com:ericsson:schema:xml:oss:oss_common" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" oc:ns="com.ericsson.oss.services" oc:name="CSLSolutionSet" oc:version="1.0.0">
+  <oc:modelCreationInfo author="eachsaj" creationDate="25/5/2016">
+    <oc:designedModel componentId="BatchProcessingSpark" />
+  </oc:modelCreationInfo>
+  <oc:desc>ExtEps Test for an extension Simple Batch Processing</oc:desc>
+  <input name="input-stream">
+    <attribute name="uri" value="kafka://spark-streaming-output-topic" />
+    <attribute name="bootstrap.servers" value="172.17.0.1:9092" />
+<attribute name ="zookeeper.connect" value="172.17.0.1:2181"/>
+    <attribute name="group.id" value="1" />
+    <attribute name="deserialization.schema" value="com.ericsson.component.aia.services.bps.flink.kafka.decoder.FlinkKafkaGenericRecordDeserializationSchema"/>
+    <attribute name="partition.assignment.strategy" value="org.apache.kafka.clients.consumer.RangeAssignor" />
+    <attribute name="version" value="9" />
+  </input>
+  <step name="ups-flink-streaming">
+    <attribute name="uri" value="flink-streaming://SampleFlinkStreamingHandler" />
+    <attribute name="driver-class" value="com.ericsson.component.aia.services.bps.flink.test.app.FlinkStreamingExampleApp" />
+    <attribute name="schemaRegistry.address" value="http://172.17.0.1:8081/" />
+    <attribute name="schemaRegistry.cacheMaximumSize" value="5000000" />
+  </step>
+ <output name="local-store">
+        <attribute name="uri" value="file:///tmp/flink"/>
+                <attribute name="data.format" value="txt"/>
+    </output>
+  <path>
+    <from uri="input-stream" />
+    <to uri="ups-flink-streaming" />
+    <to uri="local-store" />
+  </path>
+</FlowDefinition>

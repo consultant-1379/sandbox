@@ -1,0 +1,125 @@
+group EventClassMap;
+
+/**
+ * The main template that generates the class
+ */
+main(packageName, schema, schemaType, event, parameter,arrayParameter, defaultValuesNeeded) ::= <<
+package <packageName>.<schema>;
+
+/**
+ * This class is as java bean that holds a single <event> event for schema <schema>
+ * 
+ * This code is generated using java string templates
+ * see http://www.stringtemplate.org
+ */
+
+import java.io.Serializable;
+import java.util.Iterator;
+
+import com.ericsson.component.aia.model.base.meta.schema.Event;
+import com.ericsson.component.aia.model.base.meta.schema.EventParameter;
+import com.ericsson.component.aia.model.base.util.DataConverters;
+<if (defaultValuesNeeded)>
+import com.ericsson.component.aia.model.eventbean.DefaultValues;
+<endif>
+
+@SuppressWarnings({"serial","PMD"})
+public class <event> extends <packageName>.<schemaType>.<event> implements Serializable {
+    /**
+     * Define a default constructor
+     */
+    public <event>() {
+        super();
+    }
+     
+    /**
+     * Define a constructor for the base properties
+     * @param timestamp
+     * @param subNetwork
+     * @param ne
+     * @param name
+     * @param id
+     * @param version
+     */
+    public <event>(final long timestamp, final String subNetwork, final String ne, final String name, final int id, final String version) {
+        super(timestamp, subNetwork, ne, name, id, version);
+    }
+
+    /**
+     * Set the data of the <event> event from a byte array, this method is generated from
+     * the XML schema for the <event> event
+     * @param event The <event> event for which data is to be set
+     * @param data The byte array
+     * @param offset The offset in the array to start at
+     */
+    public void setData(final Event event, final byte[] data, int offset) {
+        // get an iterator to iterate over the parameters
+	    final Iterator\<EventParameter\> parameterIterator = event.getParameterList().iterator();
+	    EventParameter parameter = null;
+	
+	    // Set the parameter data one after another
+    	<parameter:createSetData()>
+    	// Seting up values for "should be" array variables 	  
+    	<arrayParameter:initializeArrayParameter()>
+    }
+}
+>>
+
+/**
+ * The template to create setData statements
+ */
+createSetData(parameter) ::= <<
+	parameter = parameterIterator.next();
+    <if (parameter.arrayElements)>
+    <if (parameter.isoffsetToUseNeed)>
+    	int offsetForData = 0;
+    <endif>
+ 	offsetForData = offset;
+	for (int i = 0; i \< parameter.getValidStructureArraySize(); i++) {
+        <parameter:createArraySetData()>
+ 	}
+ 	<if (parameter.isLastStructParam)>
+ 	offset += parameter.getValidStructureArraySize() > 0 ? ((parameter.getValidStructureArraySize() - 1) * parameter.getStructSize()) : 0;
+ 	<endif>
+ 	offset = adjustOffset(parameter, offset);   
+ 	
+    <else>
+    <parameter:createNormalSetData()>
+    <endif>
+>>
+
+initializeArrayParameter(arrayParameter) ::= <<
+	<arrayParameter.name> = new <arrayParameter.type>[] { <arrayParameter.arrayItems> };<\n>
+	
+>>
+
+/**
+ * The template to create setData statements
+ */
+createArraySetData(parameter) ::= <<
+	<if (parameter.bits)>
+    <parameter.name>[i] = (<parameter.type>)DataConverters.<parameter.dataMethod>(data, offsetForData, parameter.isUseValid(), parameter.isOptional(), parameter.isValidLTEembeddedbitFlag(), parameter.getNumberOfBytes(), <parameter.bits>);
+	<else>
+    <parameter.name>[i] = (<parameter.type>)DataConverters.<parameter.dataMethod>(data, offsetForData, parameter.isUseValid(), parameter.isOptional(), parameter.isValidLTEembeddedbitFlag(), parameter.getNumberOfBytes());
+    <endif>
+    offsetForData = adjustOffset(parameter, offsetForData) + parameter.getEndSkip() + parameter.getStartSkip();
+>>
+
+/**
+ * The template to create setData statements
+ */
+createNormalSetData(parameter) ::= <<
+<if (parameter.bits)>
+<parameter.name> = (<parameter.type>)DataConverters.<parameter.dataMethod>(data, offset, parameter.isUseValid(), parameter.isOptional(), parameter.isValidLTEembeddedbitFlag(), parameter.getNumberOfBytes(), <parameter.bits>);
+<else>
+<if (parameter.asn1Parameter)>
+final int asn1Length = L3MESSAGE_LENGTH != DefaultValues.DEFAULT_INT_VALUE ? L3MESSAGE_LENGTH : 0;
+<parameter.name> = (<parameter.type>)DataConverters.<parameter.dataMethod>(data, offset, parameter.isUseValid(), parameter.isOptional(), parameter.isValidLTEembeddedbitFlag(), asn1Length);
+parameter.setNumberOfBytes(asn1Length);
+<else>	
+<parameter.name> = (<parameter.type>)DataConverters.<parameter.dataMethod>(data, offset, parameter.isUseValid(), parameter.isOptional(), parameter.isValidLTEembeddedbitFlag(), parameter.getNumberOfBytes());
+<endif>
+<endif>
+     offset = adjustOffset(parameter, offset);
+
+>>

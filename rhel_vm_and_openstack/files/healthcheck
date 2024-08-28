@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# Some colors.
+RED="\033[1;31m"
+GREEN="\033[1;32m"
+DEFAULT="\033[0m"
+alias reset_term="tput sgr0"
+
+# Colorized echo.
+cecho () {
+    local msg=$1
+    col=$2
+    echo -e "$col$msg$DEFAULT"
+    # reset_term
+}
+
+service_list=("hadoop-hdfs-datanode" "hadoop-hdfs-namenode" "hadoop-hdfs-secondarynamenode" "hadoop-mapreduce-historyserver" "hadoop-yarn-nodemanager" "hadoop-yarn-resourcemanager" "hive-metastore" "hive-server2" "schema-registry" "kafka-server" "zeppelin" "alluxio" "spark-master" "spark-worker" "mesos-master" "mesos-slave" "marathon" "docker" "zookeeper-server" "flink" "hue2" "rstudio-server" "jupyter2" "jupyter3")
+
+for srv in "${service_list[@]}"
+do
+   status=$(systemctl is-active $srv)
+   if [[ $status == "active" ]];then
+      cecho "$srv: $status" $GREEN
+   else
+      cecho "$srv: $status" $RED
+      systemctl status $srv
+   fi
+done
+

@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FlowDefinition xmlns="urn:com:ericsson:schema:xml:oss:fbp_flow" xmlns:oc="urn:com:ericsson:schema:xml:oss:oss_common" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" oc:ns="com.ericsson.oss.services" oc:name="CSLSolutionSet"
+	oc:version="1.0.0">
+
+	<oc:modelCreationInfo author="eachsaj" creationDate="25/5/2016">
+		<oc:designedModel componentId="BatchProcessingSpark" />
+	</oc:modelCreationInfo>
+
+	<oc:desc>ExtEps Test for an extension Simple Batch Processing</oc:desc>
+
+	<input name="sales-input">
+		<attribute name="uri" value="file:////home/liam/git/aia-support/aia-support.csv-datasource/src/main/resources/SampleData/SalesInput.csv" />
+		<attribute name="header" value="true" />
+		<attribute name="inferSchema" value="true" />
+		<attribute name="drop-malformed" value="true" />
+		<attribute name="data.format" value="csv" />
+		<attribute name="skip-comments" value="true" />
+		<attribute name="quote" value="&quot;" />
+		<attribute name="table-name" value="SALES_INPUT" />
+	</input>
+
+	<input name="item-input">
+		<attribute name="uri" value="file:////home/liam/git/aia-support/aia-support.csv-datasource/src/main/resources/SampleData/ItemInput.csv" />
+		<attribute name="header" value="true" />
+		<attribute name="inferSchema" value="true" />
+		<attribute name="drop-malformed" value="true" />
+		<attribute name="data.format" value="csv" />
+		<attribute name="skip-comments" value="true" />
+		<attribute name="quote" value="&quot;" />
+		<attribute name="table-name" value="ITEM_INPUT" />
+	</input>
+
+	<input name="assistant-input">
+		<attribute name="uri" value="file:////home/liam/git/aia-support/aia-support.csv-datasource/src/main/resources/SampleData/AssistantInput.csv" />
+		<attribute name="header" value="true" />
+		<attribute name="inferSchema" value="true" />
+		<attribute name="drop-malformed" value="true" />
+		<attribute name="data.format" value="csv" />
+		<attribute name="skip-comments" value="true" />
+		<attribute name="quote" value="&quot;" />
+		<attribute name="table-name" value="ASSISTANT_INPUT" />
+	</input>
+
+	<input name="branch-input">
+		<attribute name="uri" value="file:////home/liam/git/aia-support/aia-support.csv-datasource/src/main/resources/SampleData/BranchInput.csv" />
+		<attribute name="header" value="true" />
+		<attribute name="inferSchema" value="true" />
+		<attribute name="drop-malformed" value="true" />
+		<attribute name="data.format" value="csv" />
+		<attribute name="skip-comments" value="true" />
+		<attribute name="quote" value="&quot;" />
+		<attribute name="table-name" value="BRANCH_INPUT" />
+	</input>
+
+	<output name="sales-output">
+		<attribute name="uri" value="kafka://SALES_OUTPUT?format=avro" />
+		<attribute name="bootstrap.servers" value="localhost:9092" />
+		<attribute name="eventType" value="correlation.SALES_EVENT" />
+	</output>
+
+	<step name="sales-correlation">
+		<attribute name="uri" value="spark-batch://sales-correlation" />
+		<attribute name="sql" value="
+		      SELECT
+		      SALES_INPUT.`Sale ID`          AS SALES_TRANSACTION_SALE_ID,
+		      SALES_INPUT.`Amount`           AS SALES_TRANSACTION_AMOUNT,
+		      SALES_INPUT.`Item ID`          AS SALES_TRANSACTION_ITEM_ID,
+		      SALES_INPUT.`Quantity`         AS SALES_TRANSACTION_QUANTITY,
+		      SALES_INPUT.`Assistant ID`     AS SALES_TRANSACTION_ASSISTANT_ID,
+		      SALES_INPUT.`Branch Name`      AS SALES_TRANSACTION_BRANCH_NAME,
+		      SALES_INPUT.`Notes`            AS SALES_TRANSACTION_NOTES,
+		      ITEM_INPUT.`Item ID`           AS ITEM_DETAILS_ITEM_ID,
+		      ITEM_INPUT.`Description`       AS ITEM_DETAILS_DESCRIPTION,
+		      ITEM_INPUT.`Cost Price`        AS ITEM_DETAILS_COST_PRICE,
+		      ITEM_INPUT.`Barcode`           AS ITEM_DETAILS_BARCODE,
+		      ITEM_INPUT.`Supplier ID`       AS ITEM_DETAILS_SUPPLIER_ID,
+		      ITEM_INPUT.`Category`          AS ITEM_DETAILS_CATEGORY,
+		      ASSISTANT_INPUT.`Assistant ID` AS ASSISTANT_DETAILS_ASSISTANT_ID,
+		      ASSISTANT_INPUT.`Surname`      AS ASSISTANT_DETAILS_SURNAME,
+		      ASSISTANT_INPUT.`Firstname`    AS ASSISTANT_DETAILS_FIRSTNAME,
+		      ASSISTANT_INPUT.`Middlename`   AS ASSISTANT_DETAILS_MIDDLENAME,
+		      ASSISTANT_INPUT.`Age`          AS ASSISTANT_DETAILS_AGE,
+		      ASSISTANT_INPUT.`Grade`        AS ASSISTANT_DETAILS_GRADE,
+		      ASSISTANT_INPUT.`Phone No`     AS ASSISTANT_DETAILS_PHONE_NO,
+		      BRANCH_INPUT.`Branch Name`     AS BRANCH_DETAILS_BRANCH_NAME,
+		      BRANCH_INPUT.`Branch ID`       AS BRANCH_DETAILS_BRANCH_ID,
+		      BRANCH_INPUT.`Branch Category` AS BRANCH_DETAILS_BRANCH_CATEGORY,
+		      BRANCH_INPUT.`Street`          AS BRANCH_DETAILS_STREET,
+		      BRANCH_INPUT.`City`            AS BRANCH_DETAILS_CITY,
+		      BRANCH_INPUT.`Country`         AS BRANCH_DETAILS_COUNTRY,
+		      BRANCH_INPUT.`Postcode`        AS BRANCH_DETAILS_POSTCODE
+		      FROM
+		      SALES_INPUT, ITEM_INPUT, ASSISTANT_INPUT, BRANCH_INPUT
+		      WHERE
+		      SALES_INPUT.`Item ID`=ITEM_INPUT.`Item ID`
+		      AND
+		      SALES_INPUT.`Assistant ID`=ASSISTANT_INPUT.`Assistant ID`		      
+		      AND
+		      SALES_INPUT.`Branch Name`=BRANCH_INPUT.`Branch Name`		      
+		      " />
+	</step>
+
+	<path>
+		<from uri="sales-input" />
+		<from uri="item-input" />
+		<from uri="assistant-input" />
+		<from uri="branch-input" />
+		<to uri="sales-correlation" />
+		<to uri="sales-output" />
+	</path>
+
+</FlowDefinition>

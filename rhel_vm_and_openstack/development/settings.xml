@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
+
+  <proxies>
+    <proxy>
+      <active>true</active>
+      <protocol>http</protocol>
+      <host>www-proxy.ericsson.se</host>
+      <port>8080</port>
+      <nonProxyHosts>*.ericsson.se|*.ericsson.com</nonProxyHosts>
+    </proxy>
+  </proxies>
+
+  <mirrors>
+    <mirror>
+      <id>nexus</id>
+      <mirrorOf>central</mirrorOf>
+      <url>https://arm101-eiffel004.lmera.ericsson.se:8443/nexus/content/groups/public</url>
+    </mirror>
+    <mirror>
+      <id>aia</id>
+      <mirrorOf>aia</mirrorOf>
+      <url>https://arm101-eiffel004.lmera.ericsson.se:8443/nexus/content/groups/aia-repositories</url>
+    </mirror>
+  </mirrors>
+  <profiles>
+    <profile>
+      <id>nexus</id>
+      <repositories>
+        <repository>
+          <id>central</id>
+          <url>http://central</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+            <updatePolicy>always</updatePolicy>
+          </snapshots>
+        </repository>
+      </repositories>
+      <pluginRepositories>
+        <pluginRepository>
+          <id>central</id>
+          <url>http://central</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+        </pluginRepository>
+      </pluginRepositories>
+    </profile>
+    <profile>
+      <id>aia</id>
+      <repositories>
+        <repository>
+          <id>aia</id>
+          <url>http://aia</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+            <updatePolicy>always</updatePolicy>
+          </snapshots>
+        </repository>
+      </repositories>
+      <pluginRepositories>
+        <pluginRepository>
+          <id>aia</id>
+          <url>http://aia</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+        </pluginRepository>
+      </pluginRepositories>
+    </profile>
+  </profiles>
+  <activeProfiles>
+    <activeProfile>nexus</activeProfile>
+    <activeProfile>aia</activeProfile>
+  </activeProfiles>
+
+  <pluginGroups>
+    <pluginGroup>org.sonatype.plugins</pluginGroup>
+  </pluginGroups>
+
+</settings>
+</profiles>
+<activeProfiles>
+  <activeProfile>nexus</activeProfile>
+</activeProfiles>
+
+<pluginGroups>
+  <pluginGroup>org.sonatype.plugins</pluginGroup>
+</pluginGroups>
+
+</settings>

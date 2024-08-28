@@ -1,0 +1,19 @@
+[Unit]
+Description=Jupyter notebook based on python3
+Requires=network-environment.service
+After=network-environment.service
+
+[Service]
+Type=simple
+PIDFile=/run/jupyter3.pid
+EnvironmentFile=/etc/network-environment
+ExecStart=/usr/bin/jupyter notebook --port=28889 --ip=${DEFAULT_IPV4} --NotebookApp.token=
+User=cloud-user
+Group=cloud-user
+WorkingDirectory=/home/cloud-user/notebooks
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+

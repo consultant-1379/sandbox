@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FlowDefinition xmlns="urn:com:ericsson:schema:xml:oss:fbp_flow" xmlns:oc="urn:com:ericsson:schema:xml:oss:oss_common" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" oc:ns="com.ericsson.oss.services" oc:name="CSLSolutionSet" oc:version="1.0.0">
+   <oc:modelCreationInfo author="eachsaj" creationDate="25/5/2016">
+      <oc:designedModel componentId="BatchProcessingSpark" />
+   </oc:modelCreationInfo>
+   <oc:desc>ExtEps Test for an extension Simple Batch Processing</oc:desc>
+   <input name="file-stream-csv">
+      <attribute name="uri" value="file:///aia/bank.csv" />
+      <attribute name="header" value="true" />
+      <!-- if this false define schema in json format and use the option -Dheader on deployment -->
+      <attribute name="drop-malformed" value="true" />
+      <attribute name="data.format" value="csv" />
+      <attribute name="skip-comments" value="true" />
+      <attribute name="quote" value="&quot;" />
+      <!-- If this enabled the data will be materialized , otherwise will dropped after finishing job -->
+      <attribute name="table-name" value="bank" />
+   </input>
+   <output name="hive-output">
+    <attribute name="uri" value="hive://bank_report"/>
+    <attribute name="data.format" value="parquet"/>
+    <attribute name="data.save.mode" value="Append"/>
+  </output>
+
+   <step name="sales-analysis">
+      <attribute name="uri" value="spark-batch://bank-analysis" />
+      <attribute name="sql" value="SELECT * FROM bank" />
+   </step>
+   <path>
+      <from uri="file-stream-csv" />
+      <to uri="sales-analysis" />
+      <to uri="hive-output" />
+   </path>
+</FlowDefinition>
+

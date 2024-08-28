@@ -1,0 +1,122 @@
+{
+  "pba": {
+    "name": "demo",
+    "version": "1.0.0",
+    "description": "Demo the application with BPS SDK",
+    "service": [
+      {
+        "name": "test-service",
+        "container_port": 80,
+        "service_port": 0
+      }
+    ],
+    "portal": {
+      "title": "demo",
+      "order": 1,
+      "description": "Demo the application with BPS SDK",
+      "downloads": [
+        {
+          "title": "1.0.0",
+          "link": "/paas/v1/repositories/applications/demo/1.0.0/pba.zip"
+        }
+      ]
+    },
+    "extensions": {
+      "asr-base-service-extension-point": {
+        "name": "asr-base-service-extension-point",
+        "version": "1.0.0",
+        "description": "ASR implementation Spark Service extension",
+        "platform" : [
+          { "type":"marathon", "version": "latest"}
+        ],
+        "envars":[
+          {"name": "mainClass", "value" : "com.ericsson.component.aia.services.bps.engine.service.BPSPipeLineExecuter"},
+          {"name": "masterUrl",	 "value" : "spark://10.45.16.201:7077"},
+          {"name": "applicationJar", "value" : "/spark_batch/bps-engine-deployable.jar"},
+          {"name": "appArguments",	 "value" : ""}
+        ],
+        "structure": {
+          "instance_configuration":{
+            "cpu" : "4",
+            "memory" : { "size": 4,	"unit": "Gb"}
+          }
+        },
+        "pba_policies": [],
+        "pba_lifecycle": {
+          "min_instances":1,
+          "max_instances":4,
+          "scale_triggers": [
+            {"kpi": "response_time", "value": 60},
+            {"kpi": "cpu", "value":"90"}
+          ]
+        },
+        "dependencies" :[
+          {"type": "parent",
+            "reference": "urn:uuid:8cd66ae6-b1a3-4020-aca1-1b94a6ef8c6c"},
+          {"type": "extend",
+            "reference":"foundation",
+            "qualifier":""}
+        ],
+        "integration_points": {
+          "kafka-service:1.0.0": {
+            "description": "Kafka messaging service",
+            "name": "kafka-service",
+            "version": "1.0.0"
+          }
+        },
+        "service":[{
+
+        }]
+      }
+    },
+    "deployments": {
+      "zookeeper": {
+        "id": "/bps-deployable-demo",
+        "uris": [
+          "file:///root/docker.tar.gz"
+        ],
+        "instances": 1,
+        "cpus": 1,
+        "mem": 512,
+        "container": {
+          "type": "DOCKER",
+          "volumes": [
+            {
+              "containerPath": "/usr/lib",
+              "hostPath": "/usr/lib",
+              "mode": "RW"
+            },
+            {
+              "containerPath": "/etc",
+              "hostPath": "/etc",
+              "mode": "RW"
+            },
+	    {
+              "containerPath": "/aia",
+              "hostPath": "/aia",
+              "mode": "RW"
+            },
+            {
+              "containerPath": "/home",
+              "hostPath": "/home",
+              "mode": "RW"
+            }
+          ],
+          "docker": {
+            "image": "armdocker.rnd.ericsson.se/aia/bps-demo:1.0.0",
+            "network": "HOST",
+            "forcePullImage": true,
+            "privileged": true,
+            "parameters":[
+               {"key":"env","value":"mainClass=com.ericsson.component.aia.services.bps.engine.service.BPSPipeLineExecuter"},
+               {"key":"env", "value":"deployMode=cluster"},
+               {"key":"env", "value":"masterUrl=spark://localhost:7077"},
+               {"key":"env", "value":"bpsJar=/aia/bps-engine-deployable.jar"},
+               {"key":"env", "value":"flowPath=/aia/flow.xml"}
+            ]
+          }
+        }
+      }
+    }
+  }
+}

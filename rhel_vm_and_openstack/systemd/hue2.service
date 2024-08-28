@@ -1,0 +1,15 @@
+[Unit]
+Description=Hue web server
+Documentation=http://gethue.com/
+
+[Service]
+Type=simple
+User=hue
+WorkingDirectory=/var/lib/hue/
+Environment=PYTHON_EGG_CACHE=/tmp/.hue-python-eggs
+ExecStart=/usr/bin/env /usr/lib/hue/build/env/bin/hue runcherrypyserver
+SyslogIdentifier=hue
+
+[Install]
+WantedBy=multi-user.target
+

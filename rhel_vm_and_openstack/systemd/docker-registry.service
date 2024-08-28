@@ -1,0 +1,15 @@
+[Unit]
+Description=Docker registry service
+Requires=docker.service network-environment.service
+After=docker.service network-environment.service
+
+[Service]
+Type=simple
+User=root
+ExecStart=/usr/bin/docker run --rm -p 5000:5000 --name registry registry:2
+ExecStop=/usr/bin/docker stop -t 2 registry
+ExecStopPost=/usr/bin/docker rm -f registry
+
+[Install]
+WantedBy=multi-user.target
+

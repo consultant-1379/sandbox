@@ -1,0 +1,8 @@
+{
+    "openstack_flavor":"m1.medium",
+    "openstack_source_image":"355be5dc-ca4e-4d07-b507-ee8f270c3112",
+    "openstack_networks":"66cc63dc-d721-4212-a3b8-436a74af75b3",
+    "openstack_identity_endpoint":"http://131.160.163.101:5000/v2.0",
+    "openstack_security_groups":"aia",
+    "openstack_floating_ip_pool":"ecn_floating_net"
+}

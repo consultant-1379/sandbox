@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<schemaTypes xmlns="http://www.ericsson.com/SchemaTypes">
+
+	<!-- Configuration for schemas. Schema revisions should increase lexically, 
+		with the highest schema revision being the highest lexically; Mappings will 
+		be generated towards the highest lexical schema from other schemas -->
+
+	<!-- Cell Trace -->
+	<schemaType>
+		<name>celltrace</name>
+		<idLength>24</idLength>       <!-- in bits -->
+		<idStartPos>0</idStartPos>    <!-- in bits -->
+		<idInEvent>false</idInEvent>  <!-- true if the event ID is included in the event as a field -->
+		<paramPreamble>EVENT_PARAM_</paramPreamble>
+		<valuePreamble>EVENT_VALUE_</valuePreamble>
+		<xmlFiles>
+			<path>xml/celltrace/DummyCelltrace.xml</path>    <!-- xml/celltrace/PmEvents_AA3.xml       -->
+		</xmlFiles>
+	</schemaType>
+       		<!-- CTUM -->
+    		<schemaType>
+        	<name>ctum</name>
+        	<idLength>0</idLength>       <!-- in bits -->
+       		<idStartPos>0</idStartPos>    <!-- in bits -->
+        	<idInEvent>true</idInEvent>  <!-- true if the event ID is included in the event as a field -->
+        	<xmlFiles>
+            		<path>xml/ctum/DummyCtum.xml</path>
+        	</xmlFiles>
+    	</schemaType>
+		<!-- EBM -->
+	<schemaType>
+		<name>ebm</name>
+		<idLength>8</idLength>       <!--in bits 													-->
+		<idStartPos>0</idStartPos>   <!--in bits 													-->
+		<idInEvent>true</idInEvent>  <!--true if the event ID is included in the event as a field 	-->
+		<xmlFiles><!-- /<FFV>_<FIV>_<Iteration>.xml  -->
+			<path>xml/ebm/DummyEbm.xml</path>        <!-- xml/ebm/EBM_S2-14A.xml        -->
+		</xmlFiles>
+	</schemaType>
+	<schemaType>
+                  <name>correlation</name>
+                  <idLength>0</idLength>       <!-- in bits -->
+                  <idStartPos>0</idStartPos>   <!-- in bits -->
+                  <idInEvent>true</idInEvent> <!-- true if the event ID is included in the event as a field -->
+                  <xmlFiles>
+                          <path>xml/correlation/CorrelatedEvents_PA1.xml</path>
+                  </xmlFiles>
+         </schemaType>
+</schemaTypes>

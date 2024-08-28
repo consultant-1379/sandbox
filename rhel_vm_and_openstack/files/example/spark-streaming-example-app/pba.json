@@ -1,0 +1,83 @@
+{
+  "pba": {
+    "name": "spark-streaming-example-app",
+    "version": "1.0.1",
+    "description": "This is application is used to demo the BPS based spark streaming.",
+    
+    "integrationPoints":[
+    {
+        "applicationName": "spark-streaming-example-app",
+        "applicationVersion": "1.0.1",
+        "schema": "kafka",
+        "attributes": {
+            "metadata.broker.list": "localhost",
+            "uri": "kafka://spark-streaming-topic",
+            "group.id": "1",
+            "kafka.keyClass": "java.lang.String",
+            "kafka.valueClass": "java.lang.String",
+            "kafka.keyDecoder.class": "kafka.serializer.StringDecoder",
+            "kafka.valueDecoder.class": "kafka.serializer.StringDecoder",
+            "window.length": "2",
+            "slide.window.length": "1"
+        }
+    }
+],
+    "service": [
+      {
+        "name": "test-service",
+        "container_port": 80,
+        "service_port": 0
+      }
+    ],
+    "deployments": {
+      "zookeeper": {
+        "id": "/bps-deployable-spark-streaming-example-app",
+        "uris": [
+          "file:///root/docker.tar.gz"
+        ],
+        "instances": 1,
+        "cpus": 1,
+        "mem": 512,
+        "container": {
+          "type": "DOCKER",
+          "docker":{
+            "network": "HOST",
+            "image": "localhost:5000/aia/bps-spark-streaming-example-app:1.0.1",
+            "forcePullImage": true,
+            "privileged": true,
+            "parameters":[
+              {"key" :"env","value" : "mainClass=com.ericsson.component.aia.services.bps.engine.service.BPSPipeLineExecuter"},
+              {"key" :"env","value" : "deployMode=cluster"},
+              {"key" :"env","value" : "schemaRegistry=-DschemaRegistry.address=http://172.17.0.1:8081/"},
+              {"key" :"env","value" : "masterUrl=spark://172.17.0.1:7077"},
+              {"key" :"env","value" : "bpsstreamningJar=hdfs:///tmp/spark-streaming-example-app-all-in-one.jar"},
+              {"key" :"env","value" : "flowPath=hdfs:///tmp/flow.xml"},
+              {"key" :"env","value" : "jobArguments="}
+            ]
+          },"volumes": [
+            {
+              "containerPath": "/usr/java",
+              "hostPath": "/usr/java",
+              "mode": "RW"
+            },
+            {
+              "containerPath": "/usr/lib",
+              "hostPath": "/usr/lib",
+              "mode": "RW"
+            },
+            {
+              "containerPath": "/etc",
+              "hostPath": "/etc",
+              "mode": "RW"
+            },
+            {
+              "containerPath": "/home",
+              "hostPath": "/home",
+              "mode": "RW"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

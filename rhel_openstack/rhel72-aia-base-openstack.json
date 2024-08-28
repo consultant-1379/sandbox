@@ -1,0 +1,53 @@
+{
+  "variables": {
+        "mapr_repo": "131.160.163.115",
+	"proxy_required": "false",
+ 	"create_repo_locally": "false"
+    },
+  "builders": [
+    {
+      "flavor": "m1.large",
+      "image_name": "aia-base",
+      "source_image": "355be5dc-ca4e-4d07-b507-ee8f270c3112",
+      "ssh_username": "cloud-user",
+      "type": "openstack",
+      "region":"RegionOne",
+      "networks": ["66cc63dc-d721-4212-a3b8-436a74af75b3"],
+      "identity_endpoint":"http://131.160.163.101:5000/v2.0",
+      "security_groups":["openall"],
+      "floating_ip":"131.160.163.113",
+      "communicator":"ssh",
+      "ssh_pty":"true"
+    }
+  ],
+  "provisioners": [{
+        "type": "file",
+        "source": "scripts/0_serverconfig",
+        "destination": "/tmp/0_serverconfig"
+    }, 
+    {
+        "type": "file",
+        "source": "scripts/helper_function.sh",
+        "destination": "/tmp/helper_function.sh"
+    }, 
+	{
+        "type": "shell",
+        "scripts": [
+            "scripts/1_system_base.sh",
+	    "scripts/2_docker.sh",
+            "scripts/3_system_base.sh",
+            "scripts/4_system_dev.sh",
+            "scripts/5_docker_setup.sh",
+            "scripts/6_mapr_base.sh",
+            "scripts/7_mapr_install.sh",
+            "scripts/8_mapr_ecosystem.sh",
+            "scripts/9_paas_inf.sh"
+        ],
+        "environment_vars":[
+             "PROXY_REQUIRED={{user `proxy_required`}}",
+             "MAPR_REPO_SELF={{user `create_repo_locally`}}",
+	     "MAPR_REPO_HOST={{user `mapr_repo`}}"
+        ],
+        "execute_command": "echo 'cloud-user'|{{.Vars}} sudo -E -S sh '{{.Path}}'"
+    }]
+}

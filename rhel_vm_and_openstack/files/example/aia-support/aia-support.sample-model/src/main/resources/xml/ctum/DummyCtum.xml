@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<eventspecification xmlns="http://www.ericsson.com/PmEvents">
+  <general>
+    <docno/>
+    <revision>PA1</revision>
+    <date>2016-10-14</date>
+    <author>Sean Citizen</author>
+    <ffv>0</ffv>
+  </general>
+  <parametertypes/>
+  <structuretypes/>
+  <events/>
+</eventspecification>

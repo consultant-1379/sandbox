@@ -1,0 +1,239 @@
+{
+    "variables": {
+        "vm_name": "aia-sandbox-1-1-4",
+        "virtualbox_ovf_source": "/home/exuexie/git/aia_parent_git/vm_parent_git/rhel/base/output-virtualbox-iso/aia-rhel72-base.ova",
+        "user_name":"cloud-user",
+        "group_name":"cloud-user",
+        "home_directory":"/home/cloud-user",
+        "cloudera_version":"5.8.2",
+        "zeppelin_version":"0.6.2",
+        "spark_version":"2.0.2"
+    },
+    "provisioners": [
+     {
+        "type": "shell",
+        "inline": ["mkdir -p /tmp/installer"]
+     },
+     {
+        "type": "file",
+        "source": "scripts/functions.sh",
+        "destination": "/tmp/installer/functions.sh"
+    },
+     {
+        "type": "file",
+        "source": "files",
+        "destination": "/tmp/installer"
+    },
+    {
+        "type": "file",
+        "source": "systemd/",
+        "destination": "/tmp/installer"
+    },
+    {
+        "type": "file",
+        "source": "development/",
+        "destination": "/tmp/installer"
+    },
+    {
+        "type": "file",
+        "source": "application/",
+        "destination": "/tmp/installer"
+    },
+    {
+        "type": "file",
+        "source": "howto",
+        "destination": "/tmp/installer"
+    },
+    {
+        "type": "file",
+        "source": "download/",
+        "destination": "/tmp/installer"
+    },
+    {
+        "type": "shell",
+        "scripts": [
+            "scripts/base.sh",
+            "scripts/docker.sh",
+	    "scripts/system_base.sh",
+            "scripts/system_dev.sh",
+            "scripts/paas_base.sh",
+            "scripts/analytics_hadoop.sh",
+            "scripts/analytics_base.sh",
+            "scripts/docker_setup.sh",
+            "scripts/ml_tool.sh",
+            "scripts/example.sh",
+            "scripts/cleanup.sh"
+        ],
+        "environment_vars":[
+            "USER_NAME={{user `user_name`}}",
+            "GROUP_NAME={{user `group_name`}}",
+            "HOME_DIRECTORY={{user `home_directory`}}",
+            "CLOUDERA_VERSION={{user `cloudera_version`}}",
+            "ZEPPELIN_VERSION={{user `zeppelin_version`}}",
+            "SPARK_VERSION={{user `spark_version`}}",
+            "SANDBOX_VERSION={{user `vm_name`}}"
+        ],
+        "execute_command": "echo '{{user `user_name`}}'|{{.Vars}} sudo -E -S sh '{{.Path}}'"
+    }],
+    "builders": [
+     {
+        "type": "virtualbox-ovf",
+        "source_path": "{{user `virtualbox_ovf_source`}}",
+        "vm_name": "{{user `vm_name`}}",
+        "format":  "ova",
+        "ssh_username": "vagrant",
+        "ssh_password": "vagrant",
+        "ssh_port": 22,
+        "ssh_wait_timeout": "10000s",
+        "shutdown_command": "echo '/sbin/halt -h -p' > shutdown.sh; echo 'vagrant'|sudo -S sh 'shutdown.sh'",
+        "vboxmanage": [
+            [
+                "sharedfolder",
+                "add",
+                "{{.Name}}",
+                "--name",
+                "myfolder",
+                "--hostpath",
+                "."
+            ],
+ 	   [
+                "modifyvm",
+                "{{.Name}}",
+                "--natpf1",
+                "httpd,tcp,,80,,4080"
+            ],
+            [
+                "modifyvm",
+                "{{.Name}}",
+                "--cpus",
+                "2"
+            ],
+            [
+                "modifyvm",
+                "{{.Name}}",
+                "--natpf1",
+                "marathon,tcp,,8080,,8080"
+            ],
+            [
+                "modifyvm",
+                "{{.Name}}",
+                "--natpf1",
+                "zeppelin,tcp,,9090,,9090"
+            ],
+            [
+                "modifyvm",
+                "{{.Name}}",
+                "--natpf1",
+                "mesos-master,tcp,,5050,,5050"
+            ],
+            [
+                "modifyvm",
+                "{{.Name}}",
+                "--natpf1",
+                "mesos-slave,tcp,,5051,,5051"
+            ],
+            [
+                "modifyvm",
+                "{{.Name}}",
+                "--natpf1",
+                "alluxio,tcp,,19999,,19999"
+            ],
+            [
+                "modifyvm",
+                "{{.Name}}",
+                "--natpf1",
+                "alluxio-2nd,tcp,,19998,,19998"
+            ],
+            [
+                "modifyvm",
+                "{{.Name}}",
+                "--natpf1",
+                "schema-registry,tcp,,8081,,8081"
+            ],
+            [
+                "modifyvm",
+                "{{.Name}}",
+                "--natpf1",
+                "spark-master,tcp,,7077,,7077"
+            ],
+            [
+                "modifyvm",
+                "{{.Name}}",
+                "--natpf1",
+                "spark-master-web,tcp,,18080,,18080"
+            ],
+            [
+                "modifyvm",
+                "{{.Name}}",
+                "--natpf1",
+                "spark-worker,tcp,,8888,,8888"
+            ],
+
+            [
+                "modifyvm",
+                "{{.Name}}",
+                "--natpf1",
+                "spark-worker-app,tcp,,14040,,14040"
+            ],
+
+            [
+                "modifyvm",
+                "{{.Name}}",
+                "--natpf1",
+                "zookeeper,tcp,,2181,,2181"
+            ],
+
+            [
+                "modifyvm",
+                "{{.Name}}",
+                "--natpf1",
+                "kafka,tcp,,9092,,9092"
+            ],
+
+            [
+                "modifyvm",
+                "{{.Name}}",
+                "--natpf1",
+                "datanode,tcp,,50070,,50070"
+            ],
+
+            [
+                "modifyvm",
+                "{{.Name}}",
+                "--natpf1",
+                "resourcemanager,tcp,,8088,,8088"
+            ],
+
+            [
+                "modifyvm",
+                "{{.Name}}",
+                "--natpf1",
+                "nodemanager,tcp,,8042,,8042"
+            ]
+        ]
+    },
+    {
+        "flavor": "{{user `openstack_flavor`}}",
+        "image_name": "{{user `vm_name`}}",
+        "source_image": "{{user `openstack_source_image`}}",
+        "ssh_username": "{{user `user_name`}}",
+        "type": "openstack",
+        "region":"RegionOne",
+        "networks": ["{{user `openstack_networks`}}"],
+        "identity_endpoint":"{{user `openstack_identity_endpoint`}}",
+        "security_groups":["{{user `openstack_security_groups`}}"],
+        "floating_ip_pool":"{{user `openstack_floating_ip_pool`}}",
+        "communicator":"ssh",
+        "ssh_pty":"true"        
+    }
+    ],
+    "post-processors": [
+        [{
+            "type": "vagrant",
+            "only": ["virtualbox-ovf"],
+            "keep_input_artifact": true,
+            "output": "output-{{user `vm_name`}}-{{.Provider}}.box",
+            "vagrantfile_template": "./vagrant/Vagrantfile.template"
+        }]
+    ]
+}

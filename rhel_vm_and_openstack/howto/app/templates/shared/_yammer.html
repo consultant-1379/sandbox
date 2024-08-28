@@ -1,0 +1,15 @@
+<div id="embedded-feed" style="height:450px;width:500px;overflow:scroll">
+</div>
+<script>
+    yam.connect.embedFeed({
+        container: '#embedded-feed',
+        network: 'ericsson.com',
+        feedType: 'group', // can be 'group', 'topic', or 'user'    
+        feedId: '10146495'
+    });
+</script>
+<div style="position: absolute;
+    top: 20px;
+    left: 200px;
+    z-index: 0;
+    color: #396B9A;">Loading...</div>

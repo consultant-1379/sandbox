@@ -1,0 +1,40 @@
+{
+  "type": "record",
+  "name": "access_log",
+  "namespace": "com.ericsson.aia.example.model",
+  "doc": "This schema is used to represent apache httpd access log",
+  "fields": [{
+      "name": "time",
+      "type": "string",
+      "doc": "The time at which the request was received. The format, using strftime() terminology, is as follows: [%d/%b/%Y:%H:%M:%S %z]"
+    }, {
+      "name": "remote_host",
+      "type": "string",
+      "doc": "The apparent Internet address of the requester. Intermediate proxies and firewalls might obscure the actual address of the machine making the request."
+    }, {
+      "name": "requester",
+      "type": "string",
+      "doc": "The canonical user ID of the requester, or the string Anonymous  for unauthenticated requests."
+    }, {
+      "name": "request_uri",
+      "type": "string",
+      "doc": "The Request-URI part of the HTTP request message."
+    }, {
+      "name": "http_status",
+      "type": "int",
+      "doc": "The numeric HTTP status code of the response."
+    }, {
+      "name": "bytes_sent",
+      "type": "int",
+      "doc": "The number of response bytes sent, excluding HTTP protocol overhead, or  -  if zero."
+    }, {
+      "name": "referrer",
+      "type": "string",
+      "doc": "The value of the HTTP Referrer header, if present. HTTP user-agents (e.g. browsers) typically set this header to the URL of the linking or embedding page when making a request."
+    }, {
+      "name": "user_agent",
+      "type": "string",
+      "doc": "The value of the HTTP User-Agent header."
+    }
+  ]
+}

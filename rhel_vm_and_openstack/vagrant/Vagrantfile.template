@@ -1,0 +1,36 @@
+# Vagrant file template.
+
+Vagrant.configure("2") do |config|
+    # Port forwardings.
+    config.vm.network "forwarded_port", guest: 80, host: 4080
+    config.vm.network "forwarded_port", guest: 5051, host: 5051
+    config.vm.network "forwarded_port", guest: 2181, host: 2181
+    config.vm.network "forwarded_port", guest: 7077, host: 7077
+    config.vm.network "forwarded_port", guest: 8042, host: 8042
+    config.vm.network "forwarded_port", guest: 8080, host: 8080
+    config.vm.network "forwarded_port", guest: 5050, host: 5050
+    config.vm.network "forwarded_port", guest: 8081, host: 8081
+    config.vm.network "forwarded_port", guest: 8082, host: 8082
+    config.vm.network "forwarded_port", guest: 8088, host: 8088
+    config.vm.network "forwarded_port", guest: 8888, host: 8888
+    config.vm.network "forwarded_port", guest: 9090, host: 9090
+    config.vm.network "forwarded_port", guest: 9092, host: 9092
+    config.vm.network "forwarded_port", guest: 14040, host: 14040
+    config.vm.network "forwarded_port", guest: 18080, host: 18080
+    config.vm.network "forwarded_port", guest: 18081, host: 18081
+    config.vm.network "forwarded_port", guest: 19999, host: 19999
+    config.vm.network "forwarded_port", guest: 19998, host: 19998
+    config.vm.network "forwarded_port", guest: 50070, host: 50070
+
+    # Set up a private network.
+    config.vm.network "private_network", ip: "168.168.168.168"
+
+    # Shared folder.
+    config.vm.synced_folder ".", "/home/vagrant/myfolder"
+
+    config.vm.provision "shell", privileged: false, inline: <<-EOF
+         echo "Welcome to AIA world!"
+         echo "Please login to http://localhost:4080 or http://168.168.168.168 for more information!"
+    EOF
+
+end

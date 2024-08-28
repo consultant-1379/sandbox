@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# DNS server for the ITTE cloud
+echo "nameserver 159.107.189.59" >> /etc/resolv.conf
+
+service_list=("zookeeper-server" "hadoop-hdfs-namenode" "hadoop-hdfs-secondarynamenode" "hadoop-hdfs-datanode" "hadoop-mapreduce-historyserver" "hadoop-yarn-resourcemanager" "hadoop-yarn-nodemanager" "hive-metastore" "hive-server2" "kafka-server" "schema-registry" "zeppelin" "alluxio" "spark-master" "spark-worker" "mesos-master" "mesos-slave" "marathon" "flink" "hue2" "jupyter2" "jupyter3")
+
+for srv in "${service_list[@]}"
+do
+   systemctl enable $srv
+   systemctl start $srv
+done

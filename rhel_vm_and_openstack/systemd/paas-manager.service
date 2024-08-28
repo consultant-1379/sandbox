@@ -1,0 +1,16 @@
+[Unit]
+Description=PaaS Manager
+Requires=docker.service network-environment.service
+After=docker.service network-environment.service
+
+[Service]
+Type=simple
+User=root
+EnvironmentFile=/etc/network-environment
+ExecStart=/usr/bin/docker run --rm -p 8888:8888 --net host --name aia-sdk-paas-manager -v /data:/data -v /dev/urandom:/dev/random armdocker.rnd.ericsson.se/aia/aia-sdk-paas-manager --host=${DEFAULT_IPV4} --paas.url=http://${DEFAULT_IPV4}:8888 --paas.marathon.url=http://${DEFAULT_IPV4}:8080
+ExecStop=/usr/bin/docker stop -t 2 aia-sdk-paas-manager
+ExecStopPost=/usr/bin/docker rm -f aia-sdk-paas-manager
+
+[Install]
+WantedBy=multi-user.target
+

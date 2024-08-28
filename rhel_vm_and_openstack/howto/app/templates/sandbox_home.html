@@ -1,0 +1,189 @@
+﻿<style>
+
+</style>
+<div id="wrapper">
+    <header id="header" ng-include="'app/templates/shared/_header.html'" class="col-l12 col-m12" ng-init="init('Cloud Sandbox')" ng-controller="HeaderController"></header>
+    <section class="content" style="padding-top:150px;">
+        <div class="row">
+            <div class="card radius shadowDepth1 col-l10 col-m9 gutter-m-left" style="max-width: none;height:120px;min-height: 120px;">
+                <div class="card__content card__padding">
+                    <img src="assets/opencloud.png" width="150px" alt="image" class="border-tlr-radius" style="position: relative;top: -19px;left: -90px;">
+
+                    <article class="card__article" style="position: relative;top: -90px;left: 80px;">
+                        <h4>The Sandbox provides an exploratory environment to allow you to try tools and technologies<br/>used for analytics.</h4>
+                        <!--<p>Launch Zeppelin and follow "AIA BPS demo" note to run BPS application</p>-->
+                    </article>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <span ng-repeat="c in cards">
+
+   <div ng-if="c.name=='aia'" class="card radius shadowDepth1 col-l4 col-m4">
+                        <div class="card__image border-tlr-radius">
+                            <b style="font-family: 'Ericsson Capital TT Regular', eEricssonCapital, Arial, sans-serif;font-weight: 400;font-size: 100%;background: none;font-size: 2.5rem;
+    margin-left: 31%;
+    position: relative;
+    top: 26px;
+    color: #002063;">
+                                AIA
+                            </b>
+                        </div>
+
+                        <div class="card__content card__padding">
+                        <!--ng-click="getNotebookUrl(e.id)"    -->
+<article class="card__article">
+    <h2>{{c.title}}</h2>
+    <div style="height: 131px;
+    overflow-y: scroll;
+    overflow-x: hidden;">
+        <ul style="list-style-position: outside;margin-left: 15px;list-style-type: circle;">
+            <li ng-repeat="e in aia_samples" ng-if="e.name.toLowerCase().indexOf('aia') > -1 || e.name.toLowerCase().indexOf('bps') > -1">
+                <span >
+                <a ng-href="http://{{sandboxIp}}:9090/#/notebook/{{e.id}}">
+            
+            {{e.name}}</a>
+            </span></li>
+            </ul>
+        </div>
+        </article>
+</div>
+
+
+</div>
+
+<div ng-if="c.name!='aia'" class="card radius shadowDepth1 col-l4 col-m4">
+    <div class="card__image border-tlr-radius">
+        <img src="assets/{{c.image}}" width="" title="{{c.name}}" class="{{c.name}} border-tlr-radius">
+    </div>
+
+    <div class="card__content card__padding">
+        <div class="card__share">
+            <div class="card__social text-right">
+                <span ng-show="c.links.uri !== undefined" class="share-icon rocket" ng-click="launch(c.links.uri)"><span class="fa fa-rocket"></span></span>
+                <span ng-show="c.links.uri2 !== undefined" class="share-icon rocket2" ng-click="launch(c.links.uri2)"><span class="fa fa-rocket"></span></span>
+                <span class="share-icon database" ng-click="doc(c.links.doc)"><span class="fa fa-book"></span></span>
+            </div>
+            <a id="share" class="share-toggle share-icon" ng-click="showSettings($event)"></a>
+        </div>
+        <article class="card__article" style="margin-bottom:50px;">
+            <h2>{{c.title}}</h2>
+            <div class="effect__click">
+                <div class="card__front">
+                    <p class="space-bottom">{{c.summary}}</p>
+
+                </div>
+                <div class="card__back">
+
+                    <ul ng-show="{{c.infos !== undefined}}">
+                        <li ng-repeat="info in c.infos">{{info}}</li>
+                    </ul>
+                    <span ng-show="{{c.infos === undefined}}">
+                <p class="space-bottom">{{c.summary}}</p>
+            </span>
+
+
+                </div>
+            </div>
+        </article>
+    </div>
+
+
+</div>
+</span>
+</div>
+
+</section>
+
+</div>
+<footer>
+    <p>© 2016. Ericsson</p>
+</footer>
+<style>
+    .btnGetStarted {
+        display: none;
+    }
+    
+    .card {
+        min-height: 325px;
+    }
+    
+    .card__padding {
+        padding: 10px;
+    }
+    
+    .card__share {
+        float: right;
+        margin-top: -29px;
+        right: -14px;
+    }
+    
+    .card__social {
+        left: -65px;
+    }
+    
+    .card__front,
+    .card__back {
+        position: absolute;
+        /*top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;*/
+    }
+    
+    .card__front,
+    .card__back {
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+        -webkit-transition: -webkit-transform 1.8s;
+        transition: transform 1.8s;
+    }
+    
+    .card__front {
+        /*background-color: #fff;
+        border-top: 5px solid #5C6EC6;*/
+    }
+    
+    .card__back {
+        -webkit-transform: rotateY(-180deg);
+        transform: rotateY(-180deg);
+    }
+    
+    .card__back ul {
+        font-size: .8rem;
+    }
+    
+    .card__back ul li {
+        border-top: 1px #eee solid;
+        border-bottom: 1px #eee solid;
+        padding: 3px;
+    }
+    
+    .effect__click.flipped .card__front {
+        -webkit-transform: rotateY(-180deg);
+        transform: rotateY(-180deg);
+    }
+    
+    .effect__click.flipped .card__back {
+        -webkit-transform: rotateY(0);
+        transform: rotateY(0);
+    }
+    
+    .rocket2 {
+        background-color: #04ab89;
+    }
+    
+    .zeppelin {
+        width: 50%;
+    }
+    
+    .marathon {
+        width: 50%;
+    }
+    
+    .mesos {
+        width: 90% !important;
+        max-width: 100% !important;
+        margin-left: 5% !important;
+    }
+</style>

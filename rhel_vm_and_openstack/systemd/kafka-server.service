@@ -1,0 +1,16 @@
+[Unit]
+Description=Confluent Kafka Server
+After=zookeeper-server.service
+Wants=zookeeper-server.service
+
+[Service]
+Type=simple
+User=root
+ExecStartPre=/bin/sh -c 'sleep 10'
+ExecStart=/bin/kafka-server-start /etc/kafka/server.properties
+ExecStop=/bin/kafka-server-stop
+Restart=on-abort
+
+
+[Install]
+WantedBy=multi-user.target

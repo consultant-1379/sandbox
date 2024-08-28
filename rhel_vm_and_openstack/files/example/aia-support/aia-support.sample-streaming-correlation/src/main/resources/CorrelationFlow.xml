@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FlowDefinition xmlns="urn:com:ericsson:schema:xml:oss:fbp_flow" xmlns:oc="urn:com:ericsson:schema:xml:oss:oss_common" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" oc:ns="com.ericsson.oss.services" oc:name="CSLSolutionSet"
+	oc:version="1.0.0">
+	<oc:modelCreationInfo author="eeilfn" creationDate="today">
+		<oc:designedModel componentId="someComponentId" />
+	</oc:modelCreationInfo>
+	<oc:desc>Flow for a sample Correlation</oc:desc>
+
+	<input name="sales-input">
+		<attribute name="uri" value="kafka://SALES_INPUT?format=avro" />
+		<attribute name="metadata.broker.list" value="localhost:9092" />
+		<attribute name="group.id" value="SALES_INPUT" />
+		<attribute name="window.length" value="10" />
+		<attribute name="slide.window.length" value="10" />
+	</input>
+
+	<input name="item-input">
+		<attribute name="uri" value="kafka://ITEM_INPUT?format=avro" />
+		<attribute name="metadata.broker.list" value="localhost:9092" />
+		<attribute name="group.id" value="ITEM_INPUT" />
+		<attribute name="window.length" value="10" />
+		<attribute name="slide.window.length" value="10" />
+	</input>
+
+	<input name="assistant-input">
+		<attribute name="uri" value="kafka://ASSISTANT_INPUT?format=avro" />
+		<attribute name="metadata.broker.list" value="localhost:9092" />
+		<attribute name="group.id" value="ASSISTANT_INPUT" />
+		<attribute name="window.length" value="10" />
+		<attribute name="slide.window.length" value="10" />
+	</input>
+
+	<input name="branch-input">
+		<attribute name="uri" value="kafka://BRANCH_INPUT?format=avro" />
+		<attribute name="metadata.broker.list" value="localhost:9092" />
+		<attribute name="group.id" value="BRANCH_INPUT" />
+		<attribute name="window.length" value="10" />
+		<attribute name="slide.window.length" value="10" />
+	</input>
+
+	<output name="sales-output">
+        <attribute name="uri" value= "kafka://SALES_OUTPUT?format=avro"/>
+		<attribute name="bootstrap.servers" value="localhost:9092" />
+        <attribute name="eventType" value="correlation.SALES_EVENT"/>
+    </output>
+
+	<step name="sample-correlation">
+		<attribute name="uri" value="spark-streaming://sample-correlation" />
+		<attribute name="master.url" value="local[*]" />
+		<attribute name="driver-class" value="com.ericsson.nmlab.aiasupport.samplecorrelation.SampleCorrelation" />
+		<attribute name="schemaRegistry.address" value="http://localhost:8081/" />
+		<attribute name="schemaRegistry.cacheMaximumSize" value="5000" />
+		<attribute name="window.length" value="1000" />
+	</step>
+
+	<path>
+		<from uri="sales-input" />
+		<from uri="item-input" />
+		<from uri="assistant-input" />
+		<from uri="branch-input" />
+		<to uri="sample-correlation" />
+		<to uri="sales-output" />
+	</path>
+</FlowDefinition>
+ 
+  

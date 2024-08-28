@@ -1,0 +1,490 @@
+group BeanClassMap;
+
+/**
+ * The main template that generates the class
+ */
+main(packageName, schemaType, event, parameter,arrayParameter) ::= <<
+package <packageName>.<schemaType>;
+
+/**
+ * This class is as java bean that holds a single <event.name> event and is the
+ * base class for all <event.name> events
+ * 
+ * This code is generated using java string templates
+ * see http://www.stringtemplate.org
+ */
+
+import java.io.Serializable;
+import java.sql.Timestamp;
+import java.util.Map;
+
+import org.apache.avro.Schema;
+import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.util.Utf8;
+import com.ericsson.component.aia.model.base.meta.schema.Event;
+import com.ericsson.component.aia.common.avro.GenericRecordWrapper;
+import static com.ericsson.component.aia.model.eventbean.DefaultValues.*;
+<if (event.dataConvertersNeeded)>
+import com.ericsson.component.aia.model.base.util.DataConverters;
+<endif>
+
+
+@SuppressWarnings({"serial","PMD"})
+public class <event.name> implements Serializable {
+    // Set the absolute name of this <event.name> topic
+    public static final String ABSOLUTE_NAME = "<schemaType>.<event.name>";
+   
+   // timestamp of the event
+    protected long _TIMESTAMP;
+	// NE name
+    protected String _NE;
+    //Default value is -1 to indicate not set event id
+    protected int _ID = -1;
+    
+    // Version of events
+    protected String _VERSION;
+    
+    // The member data, one for each parameter in the <event.name> event
+    <parameter:createParameter()>
+	// Below variables are not defined in xml. Modelling the "should be" array variables above as actual arrays	  	
+    <arrayParameter:createArrayParameter()>
+     /**
+     * Default constructor
+     */
+     public <event.name>(){
+     	
+     }
+    /**
+     * Define a constructor for the base properties
+     * @param record of type GenericRecord
+     */
+    public static <event.name> create (final GenericRecord record) {
+    
+     	<event.name>  object = new  <event.name>();
+      	object._TIMESTAMP= (long)record.get("_TIMESTAMP");
+      	object._NE= ((Utf8)record.get("_NE")).toString();
+      	object._ID= (int)record.get("_ID");
+        <parameter:createMapper()>
+	return object;
+    }
+ 	/**
+ 	*  This method converts this object to an Avro Generic Record
+ 	*
+ 	*/
+    public  GenericRecordWrapper  toAvro(final Long id,final Schema schema  ){
+		GenericRecordWrapper outputMap = new GenericRecordWrapper(id,schema);
+			outputMap.put("_TIMESTAMP",_TIMESTAMP);
+			outputMap.put("_NE",_NE);
+			outputMap.put("_ID",_ID);
+			outputMap.put("_VERSION",_VERSION);
+		<parameter:createMap()>
+		return outputMap;
+	}
+  	
+    /**
+     * Get the absolute name for <event.name> events
+     * @return the absolute name
+     */
+     public String getAbsoluteName() {
+         return ABSOLUTE_NAME;
+     }
+    /**
+    *   Returns the event timestmap
+    */
+    
+	public long getTIMESTAMP(){
+		return _TIMESTAMP;
+	}
+	
+	
+	/**
+    *   set the event timestmap
+    */
+    
+	public void setTIMESTAMP(long timestamp){
+		_TIMESTAMP=timestamp;
+	}
+	/**
+    *   Returns the event NE name
+    */
+	public String getNE(){
+		return _NE;
+	}
+	
+	/**
+    *   set the event NE name
+    */
+	public void setNE(String ne){
+		_NE=ne;
+	}
+	/**
+    *   Returns the event id
+    */
+	public int getID(){
+		return _ID;
+	}
+	
+	/**
+    *   set the event id
+    */
+	public void setID(int id){
+		 _ID=id;
+	}
+	
+	/**
+    *   Returns the event Version
+    */
+	public String getVERSION(){
+		return _VERSION;
+	}
+ 
+ 	/**
+    *   set the event Version
+    */
+	public void setVERSION(String version){
+		_VERSION=version;
+	}
+	
+    <parameter:createGetter()>
+    <arrayParameter:createArrayParameterGetter()>
+    
+    <parameter:createSetter()>
+
+    
+    /**
+     * Output the <event.name> event as a CSV string
+     * @return The <event.name> event data as a CSV string
+     */
+    public String getCSVString() {
+        // Output the parameter data as a CSV string
+        final StringBuilder builder = new StringBuilder();
+        
+        // Add the common fields to the CSV string
+        <parameter:createCSVOutput()>
+
+        // Return the formatted CSV string
+        return builder.toString();
+    }
+         
+    /**
+     * Output the <event.name> event as a CSV string with
+     * no double quotes around strings or arrays
+     * @return The <event.name> event data as a CSV string
+     */
+    public String getCSVStringNoQuotes() {
+        // Output the parameter data as a CSV string
+        final StringBuilder builder = new StringBuilder();
+        
+        // Add the common fields to the CSV string
+        <parameter:createCSVOutputNoQuotes()>
+
+        // Return the formatted CSV string
+        return builder.toString();
+    }
+
+        
+         
+    /**
+     * Output the <event.name> event as a CSV string without header fields
+     * @return The <event.name> event data as a CSV string without header fields
+     */
+    public String getCSVStringWithoutHeader() {
+        // Output the parameter data as a CSV string
+        final StringBuilder builder = new StringBuilder();
+        
+        <first(parameter):createFirstCSVOutput()>
+        <rest(parameter):createCSVOutput()>
+
+        // Return the formatted CSV string
+        return builder.toString();
+    }
+
+            
+    /**
+     * Method to decode the <event.name> event, prefixing each parameter with its name, and
+     * replacing commas for storage in a database friendly string
+     * @return string containing the <event.name> event
+     */
+    public String getCSVStringQuoted() {
+        return "\"" + getCSVString().replaceAll("\"","") + "\"";
+    }
+ 
+    /**
+     * Method to decode the <event.name> event, prefixing each parameter with its name
+     * @return string containing the <event.name> event
+     */
+    public String getDecodedString() {
+        // Output the parameter data as a detailed string
+        final StringBuilder builder = new StringBuilder();
+        
+        <parameter:createDecodeOutput()>
+        
+        // Return the formatted CSV string
+        return builder.toString();
+    }
+
+    
+    /**
+     * Define a copy constructor to copy a source instance
+     * @param source source instance
+     */
+     public <event.name> clone(<event.name> source) {
+        <parameter:copyConstructor()>
+        <arrayParameter:copyArrayElementConstructor()>
+        return this;
+     }
+}
+>>
+
+copyArrayElementConstructor(arrayParameter) ::= <<
+     this.<arrayParameter.name> = java.util.Arrays.copyOf(source.<arrayParameter.name>, source.<arrayParameter.name>.length);<\n>
+     
+>>
+
+/**
+ * The template to create parameters
+ */
+createParameter(parameter) ::= <<
+protected <parameter.type> <parameter.name> = <parameter.initValue>;<\n>
+>>
+
+createArrayParameter(arrayParameter)  ::= <<
+protected <arrayParameter.type>[] <arrayParameter.name> = new <arrayParameter.type>[] { <arrayParameter.arrayItems> };<\n>
+
+>>
+/**
+ * The template to create parameter getters
+ */
+createGetter(parameter) ::= <<
+
+/**
+ * Get the value of the <parameter.name> parameter
+ * @return The value of the <parameter.name> parameter
+ */
+public <parameter.type> get<parameter.name>() {
+    return <parameter.name>;
+}
+>>
+
+
+/**
+ * The template to create parameter getters
+ */
+createMapper(parameter) ::= <<
+
+<if (parameter.isString)>
+    object.<parameter.name> = (((Utf8)record.get("<parameter.name>")).toString());
+<else>
+    object.<parameter.name> = (<parameter.type>)record.get("<parameter.name>" );
+<endif>
+>>
+/**
+ * The template to create parameter getters
+ */
+createArrayParameterGetter(arrayParameter) ::= <<
+
+/**
+ * Get the value of the Array parameter <arrayParameter.name> parameter
+ * @return The value of the Array parameter <arrayParameter.name> parameter
+ */
+public <arrayParameter.type>[] get<arrayParameter.name>() {
+    return <arrayParameter.name>;
+}
+
+
+>>
+
+/**
+ * The template to create parameter setters
+ */
+createSetter(parameter) ::= <<
+
+/**
+ * Set the value of the <parameter.name> parameter
+ * @param <parameter.name> new value of the <parameter.name> parameter
+ */
+public void set<parameter.name>(final <parameter.type> <parameter.name>) {
+    this.<parameter.name> = <parameter.name>;
+     <if (parameter.shouldBeArrayElement)>
+     this.<parameter.arrayElementName>[<parameter.arrayElementIndex>] = <parameter.name>;
+     <endif>
+}
+
+>>
+
+/**
+ * The template to create first CSV output statements for a parameter without a comma
+ */
+createFirstCSVOutput(parameter) ::= <<
+    <if (parameter.arrayElements)>
+    builder.append("\"{");
+    for (int i = 0; i \< <parameter.name>.length; i++) {
+        if (i != 0) {
+            builder.append(',');
+        }
+        <parameter:createArrayOutput()>
+    }
+    builder.append("}\"");
+    <else>
+    <parameter:createNormalOutput()>
+    <endif>
+    
+>>
+
+/**
+ * The template to create Map output for each parameter
+ */
+createMap(parameter) ::= <<
+    outputMap.put("<parameter.name>", <parameter.name>);
+    
+>>
+
+/**
+ * The template to create first CSV output statements for a parameter without a comma
+ */
+createFirstCSVOutputNoQuotes(parameter) ::= <<
+    <if (parameter.arrayElements)>
+    builder.append("{");
+    for (int i = 0; i \< <parameter.name>.length; i++) {
+        if (i != 0) {
+            builder.append(',');
+        }
+        <parameter:createArrayOutput()>
+    }
+    builder.append("}");
+    <else>
+    <parameter:createNormalOutputNoQuotes()>
+    <endif>
+    
+>>
+
+/**
+ * The template to create CSV output statements for each parameter
+ */
+createCSVOutput(parameter) ::= <<
+    builder.append(',');
+    <if (parameter.arrayElements)>
+    builder.append("\"{");
+    for (int i = 0; i \< <parameter.name>.length; i++) {
+        if (i != 0) {
+            builder.append(',');
+        }
+        <parameter:createArrayOutput()>
+    }
+    builder.append("}\"");
+    <else>
+    <parameter:createNormalOutput()>
+    <endif>
+    
+>>
+
+/**
+ * The template to create CSV output statements for each parameter
+ */
+createCSVOutputNoQuotes(parameter) ::= <<
+    builder.append(',');
+    <if (parameter.arrayElements)>
+    builder.append("{");
+    for (int i = 0; i \< <parameter.name>.length; i++) {
+        if (i != 0) {
+            builder.append(',');
+        }
+        <parameter:createArrayOutput()>
+    }
+    builder.append("}");
+    <else>
+    <parameter:createNormalOutputNoQuotes()>
+    <endif>
+    
+>>
+
+/**
+ * The template to create decode output statements for each parameter
+ */
+createDecodeOutput(parameter) ::= <<
+    builder.append(",<parameter.name>=");
+    <if (parameter.arrayElements)>
+    builder.append('{');
+    for (int i = 0; i \< <parameter.name>.length; i++) {
+        if (i != 0) {
+            builder.append(',');
+        }
+        <parameter:createArrayOutput()>
+    }
+    builder.append('}');
+    <else>
+    <parameter:createNormalOutput()>
+    <endif>
+    
+>>
+
+/**
+ * The template to create decode output statements for an array parameter
+ */
+createArrayOutput(parameter) ::= <<
+<if (parameter.isByteArray)>
+if (<parameter.name>[i].length > 0) {
+	builder.append(DataConverters.getByteArrayHexString(<parameter.name>[i], 0, <parameter.name>[i].length));
+}
+else {
+	builder.append("");
+}
+<elseif (parameter.isTimestamp)>
+builder.append(DATE_FORMAT.format(new Timestamp(<parameter.name>[i])));
+<else>
+builder.append(<parameter.name>[i]);
+<endif>
+>>
+
+/**
+ * The template to create decode output statements for a normal parameter
+ */
+createNormalOutput(parameter) ::= <<
+<if (parameter.isByteArray)>
+if (<parameter.name>.length > 0) {
+	builder.append(DataConverters.getByteArrayHexString(<parameter.name>, 0, <parameter.name>.length));
+}
+else {
+	builder.append("");
+}
+<elseif (parameter.isTimestamp)>
+builder.append(DATE_FORMAT.format(new Timestamp(<parameter.name>)));
+<elseif (parameter.isString)>
+builder.append('"');
+builder.append(<parameter.name>);
+builder.append('"');
+<else>
+builder.append(<parameter.name>);
+<endif>
+    
+>>
+
+/**
+ * The template to create decode output statements for a normal parameter
+ */
+createNormalOutputNoQuotes(parameter) ::= <<
+<if (parameter.isByteArray)>
+if (<parameter.name>.length > 0) {
+	builder.append(DataConverters.getByteArrayHexString(<parameter.name>, 0, <parameter.name>.length));
+}
+else {
+	builder.append("");
+}
+<elseif (parameter.isTimestamp)>
+builder.append(DATE_FORMAT.format(new Timestamp(<parameter.name>)));
+<else>
+builder.append(<parameter.name>);
+<endif>
+    
+>>
+
+copyConstructor(parameter)  ::= <<
+   <if (parameter.isByteArray)>
+      this.<parameter.name> = java.util.Arrays.copyOf(source.<parameter.name>, source.<parameter.name>.length);
+   <elseif (parameter.arrayElements)>
+      this.<parameter.name> = java.util.Arrays.copyOf(source.<parameter.name>, source.<parameter.name>.length);
+   <else>
+      this.<parameter.name> = source.<parameter.name>;
+   <endif>
+ 
+>> 
